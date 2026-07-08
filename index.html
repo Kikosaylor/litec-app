@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#0B2545">
+<title>LITEC — Diagnóstico &amp; Orçamento</title>
+<style>
+  :root {
+    --azul: #0B2545;
+    --azul-claro: #123163;
+    --verde: #00C853;
+    --verde-escuro: #00A344;
+    --fundo: #F4F7FB;
+    --branco: #FFFFFF;
+    --texto: #1A2233;
+    --texto-suave: #5A6B85;
+    --borda: #DCE3EE;
+    --erro: #D93025;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--fundo);
+    color: var(--texto);
+    -webkit-font-smoothing: antialiased;
+  }
+  header {
+    background: var(--azul);
+    color: var(--branco);
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header h1 { font-size: 18px; margin: 0; font-weight: 700; }
+  header .subtitulo { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+
+  nav.tabs {
+    display: flex;
+    background: var(--branco);
+    border-bottom: 1px solid var(--borda);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  nav.tabs button {
+    flex: 1;
+    padding: 14px 8px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--texto-suave);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+  }
+  nav.tabs button.ativo {
+    color: var(--azul);
+    border-bottom-color: var(--verde);
+  }
+
+  main { padding: 16px; max-width: 720px; margin: 0 auto; padding-bottom: 60px; }
+  section.painel { display: none; }
+  section.painel.ativo { display: block; }
+
+  .card {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 14px;
+  }
+  .card h2 { font-size: 15px; margin: 0 0 12px; color: var(--azul); }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; color: var(--texto); }
+  select, input[type="text"], input[type="number"], textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--borda);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--branco);
+    color: var(--texto);
+  }
+  textarea { resize: vertical; min-height: 60px; }
+
+  .checkbox-row { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+  .checkbox-row input { width: 18px; height: 18px; }
+  .checkbox-row label { margin: 0; font-weight: 500; font-size: 13px; }
+
+  button.acao {
+    background: var(--verde);
+    color: var(--branco);
+    border: none;
+    padding: 13px 18px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 14px;
+  }
+  button.acao:active { background: var(--verde-escuro); }
+  button.acao:disabled { background: #A9B4C4; cursor: not-allowed; }
+
+  button.secundario {
+    background: var(--branco);
+    color: var(--azul);
+    border: 1.5px solid var(--azul);
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .fotos-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .fotos-preview img {
+    width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--borda);
+  }
+
+  .resultado {
+    white-space: pre-wrap;
+    background: var(--fundo);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 14px;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: 12px;
+  }
+
+  .loading { display: flex; align-items: center; gap: 10px; color: var(--texto-suave); font-size: 13px; margin-top: 10px; }
+  .spinner {
+    width: 16px; height: 16px; border: 2px solid var(--borda); border-top-color: var(--verde);
+    border-radius: 50%; animation: girar 0.8s linear infinite;
+  }
+  @keyframes girar { to { transform: rotate(360deg); } }
+
+  .erro-msg { color: var(--erro); font-size: 13px; margin-top: 8px; }
+
+  .resumo-preco {
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--azul), var(--azul-claro));
+    color: var(--branco);
+    border-radius: 12px;
+    margin-top: 12px;
+  }
+  .resumo-preco .valor { font-size: 32px; font-weight: 800; }
+  .resumo-preco .legenda { font-size: 12px; opacity: 0.8; margin-top: 4px; }
+
+  .historico-item {
+    border-bottom: 1px solid var(--borda);
+    padding: 10px 0;
+    font-size: 13px;
+  }
+  .historico-item:last-child { border-bottom: none; }
+  .historico-item .linha1 { font-weight: 600; }
+  .historico-item .linha2 { color: var(--texto-suave); }
+
+  .aviso-config {
+    background: #FFF4E5;
+    border: 1px solid #FFD08A;
+    color: #8A5A00;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>LITEC Shield Care</h1>
+    <div class="subtitulo">Diagnóstico &amp; Orçamento de campo</div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button id="tab-btn-diagnostico" class="ativo" onclick="mudarTab('diagnostico')">📷 Diagnóstico</button>
+  <button id="tab-btn-orcamento" onclick="mudarTab('orcamento')">💶 Orçamento</button>
+</nav>
+
+<main>
+
+<!-- ================= DIAGNOSTISCAN ================= -->
+<section id="painel-diagnostico" class="painel ativo">
+
+  <div id="aviso-endpoint" class="aviso-config" style="display:none;">
+    ⚠️ Configura o endpoint do Worker na constante <code>API_ENDPOINT</code> no início do
+    ficheiro antes de usar o Diagnóstico (ver instruções no <code>cloudflare-worker-diagnostiscan.js</code>).
+  </div>
+
+  <div class="card">
+    <h2>1. Tipo de serviço (SOP)</h2>
+    <select id="sop-tipo">
+      <option value="telhado">SOP-01 — SoftWash Telhado</option>
+      <option value="fachada">SOP-02 — SoftWash Fachada</option>
+      <option value="solar">SOP-03 — Solar Care (painéis FV)</option>
+      <option value="pavimento">SOP-04 — PressWash Pavimentos</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>2. Fotos</h2>
+    <input type="file" id="input-fotos" accept="image/*" capture="environment" multiple>
+    <div class="fotos-preview" id="fotos-preview"></div>
+
+    <label for="notas-campo">Notas de campo (opcional)</label>
+    <textarea id="notas-campo" placeholder="Ex: cliente refere infiltração há 2 anos, telhado com 15 anos..."></textarea>
+
+    <button class="acao" id="btn-analisar" onclick="analisarFotos()">Analisar</button>
+    <div id="diag-loading" class="loading" style="display:none;">
+      <div class="spinner"></div> A analisar fotos...
+    </div>
+    <div id="diag-erro" class="erro-msg"></div>
+  </div>
+
+  <div class="card" id="card-resultado-diag" style="display:none;">
+    <h2>Diagnóstico</h2>
+    <div class="resultado" id="resultado-diagnostico"></div>
+    <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('resultado-diagnostico')">Copiar</button>
+    <button class="secundario" style="margin-top:10px;" onclick="usarNoOrcamento()">Usar no Orçamento →</button>
+  </div>
+
+</section>
+
+<!-- ================= ORÇAMENTO ================= -->
+<section id="painel-orcamento" class="painel">
+
+  <div class="card">
+    <h2>1. Zona geográfica</h2>
+    <select id="orc-zona">
+      <option value="ultra">Ultra-Premium (Aroeira, Belverde, Verdizela, Tróia)</option>
+      <option value="premium">Premium (Costa da Caparica, Sobreda, Almada Centro)</option>
+      <option value="urbana">Urbana (Laranjeiro, Feijó, Corroios, Seixal)</option>
+    </select>
+
+    <label for="orc-servico">Serviço</label>
+    <select id="orc-servico" onchange="atualizarUnidade()">
+      <option value="telhado">SoftWash Telhado</option>
+      <option value="fachada">SoftWash Fachada</option>
+      <option value="solar">SolarCare Painéis</option>
+      <option value="pavimento">PressWash Pavimentos</option>
+    </select>
+
+    <label id="label-quantidade" for="orc-quantidade">Área (m²)</label>
+    <input type="number" id="orc-quantidade" min="0" step="0.5" placeholder="Ex: 120">
+  </div>
+
+  <div class="card">
+    <h2>2. Majoradores técnicos de campo</h2>
+    <div class="checkbox-row">
+      <input type="checkbox" id="maj-altura6">
+      <label for="maj-altura6">Altura &gt; 6 metros (×1.15)</label>
+    </div>
+    <div class="checkbox-row">
+      <input type="checkbox" id="maj-altura9">
+      <label for="maj-altura9">Altura &gt; 9 metros — MEWP (+€250 fixo)</label>
+    </div>
+    <div class="checkbox-row" id="row-inclinacao">
+      <input type="checkbox" id="maj-inclinacao">
+      <label for="maj-inclinacao">Inclinação do telhado &gt; 35° (×1.20)</label>
+    </div>
+    <label for="maj-contaminacao">Contaminação biológica</label>
+    <select id="maj-contaminacao">
+      <option value="1">Normal</option>
+      <option value="1.15">Severa (×1.15)</option>
+      <option value="1.25">Muito severa (×1.25)</option>
+    </select>
+  </div>
+
+  <div class="card">
+    <h2>3. Ajuste dentro da gama &amp; desconto</h2>
+    <label for="orc-posicao">Posição na gama de preço (€/unidade)</label>
+    <input type="range" id="orc-posicao" min="0" max="100" value="50" oninput="calcularOrcamento()">
+    <div id="orc-preco-unidade" style="font-size:13px; color: var(--texto-suave); text-align:center;"></div>
+
+    <label for="orc-desconto">Desconto cross-selling (máx. 15%)</label>
+    <input type="number" id="orc-desconto" min="0" max="15" value="0" step="1">
+    <div id="aviso-desconto" class="erro-msg"></div>
+
+    <label for="orc-cliente">Nome do cliente (opcional)</label>
+    <input type="text" id="orc-cliente" placeholder="Ex: Sr. Costa">
+
+    <button class="acao" onclick="calcularOrcamento(true)">Calcular Orçamento</button>
+  </div>
+
+  <div class="card" id="card-resultado-orc" style="display:none;">
+    <div class="resumo-preco">
+      <div class="valor" id="orc-valor-final">€0</div>
+      <div class="legenda" id="orc-legenda-final"></div>
+    </div>
+    <label for="orc-texto-whatsapp" style="margin-top:14px;">Texto para WhatsApp</label>
+    <textarea id="orc-texto-whatsapp" style="min-height:160px;" readonly></textarea>
+    <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('orc-texto-whatsapp')">Copiar para WhatsApp</button>
+  </div>
+
+  <div class="card">
+    <h2>Histórico (neste dispositivo)</h2>
+    <div id="orc-historico"></div>
+  </div>
+
+</section>
+
+</main>
+
+<script>
+// ==========================================================================
+// CONFIGURAÇÃO — substituir pelo URL do teu Cloudflare Worker após o deploy
+// (ver instruções em cloudflare-worker-diagnostiscan.js)
+// ==========================================================================
+const API_ENDPOINT = "https://litec-diagnostiscan.fap-antunes.workers.dev";
+
+// ==========================================================================
+// PRICEBOOK — Referência R8 (zonas + majoradores)
+// ==========================================================================
+const ZONAS = {
+  ultra:   { nome: "Ultra-Premium", telhado: [10,14], fachada: [9,12], solar: [7,12], pavimento: [5,8] },
+  premium: { nome: "Premium",       telhado: [8,12],  fachada: [7,10], solar: [6,9],  pavimento: [4,6] },
+  urbana:  { nome: "Urbana",        telhado: [7,10],  fachada: [6,9],  solar: [4,8],  pavimento: [3,5] },
+};
+const MINIMOS = { telhado: 350, fachada: 300, solar: 120, pavimento: 150 };
+const NOMES_SERVICO = {
+  telhado: "SoftWash Telhado", fachada: "SoftWash Fachada",
+  solar: "SolarCare Painéis", pavimento: "PressWash Pavimentos",
+};
+const UNIDADE = { telhado: "m²", fachada: "m²", solar: "painéis", pavimento: "m²" };
+
+// ==========================================================================
+// NAVEGAÇÃO ENTRE TABS
+// ==========================================================================
+function mudarTab(nome) {
+  document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('ativo'));
+  document.getElementById('painel-' + nome).classList.add('ativo');
+  document.getElementById('tab-btn-' + nome).classList.add('ativo');
+}
+
+// ==========================================================================
+// DIAGNOSTISCAN
+// ==========================================================================
+let fotosBase64 = [];
+
+document.getElementById('input-fotos').addEventListener('change', async (e) => {
+  const preview = document.getElementById('fotos-preview');
+  preview.innerHTML = '';
+  fotosBase64 = [];
+  for (const file of e.target.files) {
+    const base64 = await fileParaBase64(file);
+    fotosBase64.push({ data: base64.split(',')[1], media_type: file.type });
+    const img = document.createElement('img');
+    img.src = base64;
+    preview.appendChild(img);
+  }
+});
+
+function fileParaBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function analisarFotos() {
+  const erroEl = document.getElementById('diag-erro');
+  erroEl.textContent = '';
+
+  if (!API_ENDPOINT) {
+    document.getElementById('aviso-endpoint').style.display = 'block';
+    return;
+  }
+  if (fotosBase64.length === 0) {
+    erroEl.textContent = 'Tira ou seleciona pelo menos uma foto primeiro.';
+    return;
+  }
+
+  const btn = document.getElementById('btn-analisar');
+  const loading = document.getElementById('diag-loading');
+  btn.disabled = true;
+  loading.style.display = 'flex';
+  document.getElementById('card-resultado-diag').style.display = 'none';
+
+  try {
+    const resp = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        images: fotosBase64,
+        sopType: document.getElementById('sop-tipo').value,
+        notes: document.getElementById('notas-campo').value,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.error || 'Erro desconhecido');
+    }
+    document.getElementById('resultado-diagnostico').textContent = data.diagnosis;
+    document.getElementById('card-resultado-diag').style.display = 'block';
+  } catch (err) {
+    erroEl.textContent = 'Erro ao analisar: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+
+function usarNoOrcamento() {
+  const sopParaServico = { telhado: 'telhado', fachada: 'fachada', solar: 'solar', pavimento: 'pavimento' };
+  document.getElementById('orc-servico').value = sopParaServico[document.getElementById('sop-tipo').value];
+  atualizarUnidade();
+  mudarTab('orcamento');
+}
+
+// ==========================================================================
+// CALCULADORA DE ORÇAMENTO
+// ==========================================================================
+function atualizarUnidade() {
+  const servico = document.getElementById('orc-servico').value;
+  document.getElementById('label-quantidade').textContent =
+    servico === 'solar' ? 'Número de painéis' : 'Área (m²)';
+  document.getElementById('row-inclinacao').style.display =
+    servico === 'telhado' ? 'flex' : 'none';
+  calcularOrcamento();
+}
+
+function calcularOrcamento(gerarTexto) {
+  const zonaKey = document.getElementById('orc-zona').value;
+  const servico = document.getElementById('orc-servico').value;
+  const quantidade = parseFloat(document.getElementById('orc-quantidade').value) || 0;
+  const posicao = parseFloat(document.getElementById('orc-posicao').value) / 100;
+
+  const [min, max] = ZONAS[zonaKey][servico];
+  const precoUnidade = min + (max - min) * posicao;
+  document.getElementById('orc-preco-unidade').textContent =
+    `€${precoUnidade.toFixed(2)} / ${UNIDADE[servico]} (gama €${min}–€${max})`;
+
+  if (!gerarTexto) return;
+
+  let subtotal = precoUnidade * quantidade;
+
+  // Majoradores multiplicativos
+  if (document.getElementById('maj-altura6').checked) subtotal *= 1.15;
+  if (servico === 'telhado' && document.getElementById('maj-inclinacao').checked) subtotal *= 1.20;
+  subtotal *= parseFloat(document.getElementById('maj-contaminacao').value);
+
+  // Majorador fixo
+  if (document.getElementById('maj-altura9').checked) subtotal += 250;
+
+  // Mínimo do serviço
+  subtotal = Math.max(subtotal, MINIMOS[servico]);
+
+  // Desconto (máx. 15%)
+  let desconto = parseFloat(document.getElementById('orc-desconto').value) || 0;
+  const avisoDesconto = document.getElementById('aviso-desconto');
+  if (desconto > 15) {
+    desconto = 15;
+    avisoDesconto.textContent = 'Desconto máximo acumulado permitido é 15% — ajustado automaticamente.';
+  } else {
+    avisoDesconto.textContent = '';
+  }
+  const total = subtotal * (1 - desconto / 100);
+
+  document.getElementById('orc-valor-final').textContent = `€${total.toFixed(0)}`;
+  document.getElementById('orc-legenda-final').textContent =
+    `${NOMES_SERVICO[servico]} — ${ZONAS[zonaKey].nome}` + (desconto > 0 ? ` (desconto ${desconto}% aplicado)` : '');
+  document.getElementById('card-resultado-orc').style.display = 'block';
+
+  const cliente = document.getElementById('orc-cliente').value.trim();
+  const texto =
+`${cliente ? 'Olá ' + cliente + ',' : 'Olá,'}
+
+Segue o orçamento LITEC Shield Care:
+
+Serviço: ${NOMES_SERVICO[servico]}
+Área/quantidade: ${quantidade} ${UNIDADE[servico]}
+Zona: ${ZONAS[zonaKey].nome}
+Valor total: €${total.toFixed(0)}${desconto > 0 ? ` (inclui desconto de ${desconto}%)` : ''}
+
+Este tratamento prolonga a vida útil do imóvel e evita custos muito superiores de repintura (€35.000–€60.000 numa fachada completa).
+
+Fico ao dispor para agendar.
+LITEC Shield Care`;
+  document.getElementById('orc-texto-whatsapp').value = texto;
+
+  guardarHistorico({ servico, zona: ZONAS[zonaKey].nome, quantidade, total, cliente, data: new Date().toISOString() });
+}
+
+document.getElementById('orc-desconto').addEventListener('input', () => calcularOrcamento(true));
+
+// ==========================================================================
+// HISTÓRICO (localStorage)
+// ==========================================================================
+function guardarHistorico(item) {
+  const historico = JSON.parse(localStorage.getItem('litec_historico') || '[]');
+  historico.unshift(item);
+  localStorage.setItem('litec_historico', JSON.stringify(historico.slice(0, 30)));
+  renderHistorico();
+}
+
+function renderHistorico() {
+  const historico = JSON.parse(localStorage.getItem('litec_historico') || '[]');
+  const container = document.getElementById('orc-historico');
+  if (historico.length === 0) {
+    container.innerHTML = '<div style="font-size:13px; color:var(--texto-suave);">Sem orçamentos gerados ainda.</div>';
+    return;
+  }
+  container.innerHTML = historico.map(h => {
+    const data = new Date(h.data).toLocaleDateString('pt-PT');
+    return `<div class="historico-item">
+      <div class="linha1">${NOMES_SERVICO[h.servico]} — €${h.total.toFixed(0)}</div>
+      <div class="linha2">${h.cliente || 'Sem nome'} · ${h.zona} · ${data}</div>
+    </div>`;
+  }).join('');
+}
+
+// ==========================================================================
+// UTILITÁRIOS
+// ==========================================================================
+function copiarTexto(elementId) {
+  const el = document.getElementById(elementId);
+  const texto = el.tagName === 'TEXTAREA' ? el.value : el.textContent;
+  navigator.clipboard.writeText(texto).then(() => {
+    alert('Copiado!');
+  });
+}
+
+// Inicialização
+if (!API_ENDPOINT) {
+  document.getElementById('aviso-endpoint').style.display = 'block';
+}
+atualizarUnidade();
+renderHistorico();
+</script>
+
+</body>
+</html>

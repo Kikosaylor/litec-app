@@ -117,8 +117,31 @@
   }
 
   .fotos-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-  .fotos-preview img {
+  .foto-item { position: relative; width: 72px; height: 72px; }
+  .foto-item img {
     width: 72px; height: 72px; object-fit: cover; border-radius: 8px; border: 1px solid var(--borda);
+    display: block;
+  }
+  .foto-item .remover {
+    position: absolute; top: -6px; right: -6px;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--erro); color: var(--branco);
+    border: 2px solid var(--branco);
+    font-size: 11px; line-height: 1; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0;
+  }
+
+  .diag-linha { margin-bottom: 10px; }
+  .diag-linha .rotulo {
+    display: block; font-size: 11px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .3px; color: var(--azul); margin-bottom: 2px;
+  }
+  .diag-linha .valor { font-size: 14px; }
+  .diag-sop-badge {
+    display: inline-block; background: var(--verde); color: var(--branco);
+    font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    margin-bottom: 10px;
   }
 
   .resultado {
@@ -197,19 +220,15 @@
   </div>
 
   <div class="card">
-    <h2>1. Tipo de serviço (SOP)</h2>
-    <select id="sop-tipo">
-      <option value="telhado">SOP-01 — SoftWash Telhado</option>
-      <option value="fachada">SOP-02 — SoftWash Fachada</option>
-      <option value="solar">SOP-03 — Solar Care (painéis FV)</option>
-      <option value="pavimento">SOP-04 — PressWash Pavimentos</option>
-    </select>
-  </div>
-
-  <div class="card">
-    <h2>2. Fotos</h2>
-    <input type="file" id="input-fotos" accept="image/*" capture="environment" multiple>
+    <h2>1. Fotos</h2>
+    <div style="display:flex; gap:8px;">
+      <button type="button" class="secundario" style="flex:1;" onclick="document.getElementById('input-camera').click()">📷 Tirar Foto</button>
+      <button type="button" class="secundario" style="flex:1;" onclick="document.getElementById('input-galeria').click()">🖼️ Carregar Fotos</button>
+    </div>
+    <input type="file" id="input-camera" accept="image/*" capture="environment" multiple style="display:none;">
+    <input type="file" id="input-galeria" accept="image/*" multiple style="display:none;">
     <div class="fotos-preview" id="fotos-preview"></div>
+    <button type="button" class="secundario" id="btn-limpar-fotos" style="display:none; margin-top:8px;" onclick="limparFotos()">Limpar fotos</button>
 
     <label for="notas-campo">Notas de campo (opcional)</label>
     <textarea id="notas-campo" placeholder="Ex: cliente refere infiltração há 2 anos, telhado com 15 anos..."></textarea>
@@ -223,6 +242,13 @@
 
   <div class="card" id="card-resultado-diag" style="display:none;">
     <h2>Diagnóstico</h2>
+    <label for="sop-tipo">Tipo de serviço identificado (confirma ou corrige)</label>
+    <select id="sop-tipo">
+      <option value="telhado">SOP-01 — SoftWash Telhado</option>
+      <option value="fachada">SOP-02 — SoftWash Fachada</option>
+      <option value="solar">SOP-03 — Solar Care (painéis FV)</option>
+      <option value="pavimento">SOP-04 — PressWash Pavimentos</option>
+    </select>
     <div class="resultado" id="resultado-diagnostico"></div>
     <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('resultado-diagnostico')">Copiar</button>
     <button class="secundario" style="margin-top:10px;" onclick="usarNoOrcamento()">Usar no Orçamento →</button>
@@ -347,18 +373,47 @@ function mudarTab(nome) {
 // ==========================================================================
 let fotosBase64 = [];
 
-document.getElementById('input-fotos').addEventListener('change', async (e) => {
+async function adicionarFotos(fileList) {
+  for (const file of fileList) {
+    const base64 = await fileParaBase64(file);
+    fotosBase64.push({ data: base64.split(',')[1], media_type: file.type, preview: base64 });
+  }
+  renderFotosPreview();
+}
+
+document.getElementById('input-camera').addEventListener('change', (e) => {
+  adicionarFotos(e.target.files);
+  e.target.value = '';
+});
+document.getElementById('input-galeria').addEventListener('change', (e) => {
+  adicionarFotos(e.target.files);
+  e.target.value = '';
+});
+
+function renderFotosPreview() {
   const preview = document.getElementById('fotos-preview');
   preview.innerHTML = '';
-  fotosBase64 = [];
-  for (const file of e.target.files) {
-    const base64 = await fileParaBase64(file);
-    fotosBase64.push({ data: base64.split(',')[1], media_type: file.type });
+  fotosBase64.forEach((foto, i) => {
+    const item = document.createElement('div');
+    item.className = 'foto-item';
     const img = document.createElement('img');
-    img.src = base64;
-    preview.appendChild(img);
-  }
-});
+    img.src = foto.preview;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'remover';
+    btn.textContent = '✕';
+    btn.onclick = () => { fotosBase64.splice(i, 1); renderFotosPreview(); };
+    item.appendChild(img);
+    item.appendChild(btn);
+    preview.appendChild(item);
+  });
+  document.getElementById('btn-limpar-fotos').style.display = fotosBase64.length ? 'inline-block' : 'none';
+}
+
+function limparFotos() {
+  fotosBase64 = [];
+  renderFotosPreview();
+}
 
 function fileParaBase64(file) {
   return new Promise((resolve, reject) => {
@@ -394,7 +449,6 @@ async function analisarFotos() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         images: fotosBase64,
-        sopType: document.getElementById('sop-tipo').value,
         notes: document.getElementById('notas-campo').value,
       }),
     });
@@ -402,7 +456,7 @@ async function analisarFotos() {
     if (!resp.ok) {
       throw new Error(data.error || 'Erro desconhecido');
     }
-    document.getElementById('resultado-diagnostico').textContent = data.diagnosis;
+    renderDiagnostico(data.diagnosis);
     document.getElementById('card-resultado-diag').style.display = 'block';
   } catch (err) {
     erroEl.textContent = 'Erro ao analisar: ' + err.message;
@@ -410,6 +464,46 @@ async function analisarFotos() {
     btn.disabled = false;
     loading.style.display = 'none';
   }
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str == null ? '' : String(str);
+  return div.innerHTML;
+}
+
+function renderDiagnostico(diagnosis) {
+  const el = document.getElementById('resultado-diagnostico');
+
+  // Fallback: se o worker não conseguiu estruturar em JSON, mostra o texto tal e qual.
+  if (typeof diagnosis === 'string') {
+    el.textContent = diagnosis;
+    return;
+  }
+
+  const d = diagnosis || {};
+  let html = '';
+
+  const CHAVES_VALIDAS = ['telhado', 'fachada', 'solar', 'pavimento'];
+  if (CHAVES_VALIDAS.includes(d.sop_chave)) {
+    document.getElementById('sop-tipo').value = d.sop_chave;
+  }
+
+  if (d.sop_aplicavel) {
+    html += `<div class="diag-sop-badge">${escapeHtml(d.sop_aplicavel)}</div><br>`;
+  }
+
+  const linha = (rotulo, valor) => valor
+    ? `<div class="diag-linha"><span class="rotulo">${escapeHtml(rotulo)}</span><span class="valor">${escapeHtml(valor)}</span></div>`
+    : '';
+
+  html += linha('Material / superfície', d.material);
+  html += linha('Estado e causa', d.causa || d.estado);
+  html += linha('Produto e diluição', d.produto_diluicao);
+  html += linha('Pressão recomendada', d.pressao);
+  html += linha('Riscos / avisos', d.riscos);
+
+  el.innerHTML = html || '<em>Sem resposta estruturada — tenta novamente.</em>';
 }
 
 function usarNoOrcamento() {
@@ -526,7 +620,7 @@ function renderHistorico() {
 // ==========================================================================
 function copiarTexto(elementId) {
   const el = document.getElementById(elementId);
-  const texto = el.tagName === 'TEXTAREA' ? el.value : el.textContent;
+  const texto = el.tagName === 'TEXTAREA' ? el.value : el.innerText;
   navigator.clipboard.writeText(texto).then(() => {
     alert('Copiado!');
   });

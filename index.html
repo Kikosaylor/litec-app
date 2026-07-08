@@ -302,7 +302,19 @@
   </div>
 
   <div class="card">
-    <h2>3. Ajuste dentro da gama &amp; desconto</h2>
+    <h2>3. Diagnóstico para a proposta</h2>
+    <label for="orc-material">Material / superfície</label>
+    <input type="text" id="orc-material" placeholder="Preenchido automaticamente após o Diagnóstico, ou escreve à mão">
+
+    <label for="orc-causa">Estado e causa</label>
+    <textarea id="orc-causa" placeholder="Ex: manchas escuras verticais por baixo da caleira, causadas por musgo/líquenes"></textarea>
+
+    <label for="orc-riscos">Riscos/avisos técnicos (uso interno — nunca é enviado ao cliente)</label>
+    <textarea id="orc-riscos" placeholder="Ex: confirmar no local se é ETICS/Capoto antes de aplicar produto"></textarea>
+  </div>
+
+  <div class="card">
+    <h2>4. Ajuste dentro da gama &amp; desconto</h2>
     <label for="orc-posicao">Posição na gama de preço (€/unidade)</label>
     <input type="range" id="orc-posicao" min="0" max="100" value="50" oninput="calcularOrcamento()">
     <div id="orc-preco-unidade" style="font-size:13px; color: var(--texto-suave); text-align:center;"></div>
@@ -314,7 +326,11 @@
     <label for="orc-cliente">Nome do cliente (opcional)</label>
     <input type="text" id="orc-cliente" placeholder="Ex: Sr. Costa">
 
-    <button class="acao" onclick="calcularOrcamento(true)">Calcular Orçamento</button>
+    <button class="acao" id="btn-gerar-proposta" onclick="gerarProposta()">Gerar Proposta</button>
+    <div id="orc-loading" class="loading" style="display:none;">
+      <div class="spinner"></div> A gerar proposta...
+    </div>
+    <div id="orc-erro" class="erro-msg"></div>
   </div>
 
   <div class="card" id="card-resultado-orc" style="display:none;">
@@ -322,9 +338,15 @@
       <div class="valor" id="orc-valor-final">€0</div>
       <div class="legenda" id="orc-legenda-final"></div>
     </div>
-    <label for="orc-texto-whatsapp" style="margin-top:14px;">Texto para WhatsApp</label>
+    <label for="orc-texto-whatsapp" style="margin-top:14px;">Mensagem para o cliente</label>
     <textarea id="orc-texto-whatsapp" style="min-height:160px;" readonly></textarea>
     <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('orc-texto-whatsapp')">Copiar para WhatsApp</button>
+
+    <div id="orc-notas-internas-box" style="display:none; margin-top:14px;">
+      <label for="orc-notas-internas" style="margin-top:0;">🔒 Notas internas (não enviar ao cliente)</label>
+      <div class="resultado" id="orc-notas-internas"></div>
+      <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('orc-notas-internas')">Copiar notas</button>
+    </div>
   </div>
 
   <div class="card">
@@ -372,6 +394,7 @@ function mudarTab(nome) {
 // DIAGNOSTISCAN
 // ==========================================================================
 let fotosBase64 = [];
+let ultimoDiagnostico = null;
 
 async function adicionarFotos(fileList) {
   for (const file of fileList) {
@@ -482,6 +505,7 @@ function renderDiagnostico(diagnosis) {
   }
 
   const d = diagnosis || {};
+  ultimoDiagnostico = d;
   let html = '';
 
   const CHAVES_VALIDAS = ['telhado', 'fachada', 'solar', 'pavimento'];
@@ -507,9 +531,13 @@ function renderDiagnostico(diagnosis) {
 }
 
 function usarNoOrcamento() {
-  const sopParaServico = { telhado: 'telhado', fachada: 'fachada', solar: 'solar', pavimento: 'pavimento' };
-  document.getElementById('orc-servico').value = sopParaServico[document.getElementById('sop-tipo').value];
+  document.getElementById('orc-servico').value = document.getElementById('sop-tipo').value;
   atualizarUnidade();
+  if (ultimoDiagnostico) {
+    document.getElementById('orc-material').value = ultimoDiagnostico.material || '';
+    document.getElementById('orc-causa').value = ultimoDiagnostico.causa || '';
+    document.getElementById('orc-riscos').value = ultimoDiagnostico.riscos || '';
+  }
   mudarTab('orcamento');
 }
 
@@ -525,7 +553,7 @@ function atualizarUnidade() {
   calcularOrcamento();
 }
 
-function calcularOrcamento(gerarTexto) {
+function calcularOrcamento(finalizar) {
   const zonaKey = document.getElementById('orc-zona').value;
   const servico = document.getElementById('orc-servico').value;
   const quantidade = parseFloat(document.getElementById('orc-quantidade').value) || 0;
@@ -536,7 +564,7 @@ function calcularOrcamento(gerarTexto) {
   document.getElementById('orc-preco-unidade').textContent =
     `€${precoUnidade.toFixed(2)} / ${UNIDADE[servico]} (gama €${min}–€${max})`;
 
-  if (!gerarTexto) return;
+  if (!finalizar) return null;
 
   let subtotal = precoUnidade * quantidade;
 
@@ -568,26 +596,68 @@ function calcularOrcamento(gerarTexto) {
   document.getElementById('card-resultado-orc').style.display = 'block';
 
   const cliente = document.getElementById('orc-cliente').value.trim();
-  const texto =
-`${cliente ? 'Olá ' + cliente + ',' : 'Olá,'}
-
-Segue o orçamento LITEC Shield Care:
-
-Serviço: ${NOMES_SERVICO[servico]}
-Área/quantidade: ${quantidade} ${UNIDADE[servico]}
-Zona: ${ZONAS[zonaKey].nome}
-Valor total: €${total.toFixed(0)}${desconto > 0 ? ` (inclui desconto de ${desconto}%)` : ''}
-
-Este tratamento prolonga a vida útil do imóvel e evita custos muito superiores de repintura (€35.000–€60.000 numa fachada completa).
-
-Fico ao dispor para agendar.
-LITEC Shield Care`;
-  document.getElementById('orc-texto-whatsapp').value = texto;
-
   guardarHistorico({ servico, zona: ZONAS[zonaKey].nome, quantidade, total, cliente, data: new Date().toISOString() });
+
+  return { servico, zonaKey, quantidade, total, desconto, cliente };
 }
 
-document.getElementById('orc-desconto').addEventListener('input', () => calcularOrcamento(true));
+async function gerarProposta() {
+  const dados = calcularOrcamento(true);
+  if (!dados) return;
+
+  const erroEl = document.getElementById('orc-erro');
+  erroEl.textContent = '';
+  const btn = document.getElementById('btn-gerar-proposta');
+  const loading = document.getElementById('orc-loading');
+  btn.disabled = true;
+  loading.style.display = 'flex';
+  document.getElementById('orc-texto-whatsapp').value = '';
+  document.getElementById('orc-notas-internas-box').style.display = 'none';
+
+  try {
+    const resp = await fetch(API_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'proposta',
+        tipo_servico: NOMES_SERVICO[dados.servico],
+        material_superficie: document.getElementById('orc-material').value,
+        estado_causa: document.getElementById('orc-causa').value,
+        riscos_avisos: document.getElementById('orc-riscos').value,
+        area: `${dados.quantidade} ${UNIDADE[dados.servico]}`,
+        zona: ZONAS[dados.zonaKey].nome,
+        valor_total: `€${dados.total.toFixed(0)}`,
+      }),
+    });
+    const data = await resp.json();
+    if (!resp.ok) {
+      throw new Error(data.error || 'Erro desconhecido');
+    }
+    renderProposta(data.proposta);
+  } catch (err) {
+    erroEl.textContent = 'Erro ao gerar proposta: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    loading.style.display = 'none';
+  }
+}
+
+function renderProposta(proposta) {
+  if (typeof proposta === 'string') {
+    document.getElementById('orc-texto-whatsapp').value = proposta;
+    document.getElementById('orc-notas-internas-box').style.display = 'none';
+    return;
+  }
+  const p = proposta || {};
+  document.getElementById('orc-texto-whatsapp').value = p.mensagem_cliente || '';
+  const notasBox = document.getElementById('orc-notas-internas-box');
+  if (p.notas_internas) {
+    document.getElementById('orc-notas-internas').textContent = p.notas_internas;
+    notasBox.style.display = 'block';
+  } else {
+    notasBox.style.display = 'none';
+  }
+}
 
 // ==========================================================================
 // HISTÓRICO (localStorage)

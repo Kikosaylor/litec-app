@@ -244,10 +244,10 @@
     <h2>Diagnóstico</h2>
     <label for="sop-tipo">Tipo de serviço identificado (confirma ou corrige)</label>
     <select id="sop-tipo">
-      <option value="telhado">SOP-01 — SoftWash Telhado</option>
-      <option value="fachada">SOP-02 — SoftWash Fachada</option>
+      <option value="telhado">SOP-01 — Roof Care</option>
+      <option value="fachada">SOP-02 — Facade Treatment</option>
       <option value="solar">SOP-03 — Solar Care (painéis FV)</option>
-      <option value="pavimento">SOP-04 — PressWash Pavimentos</option>
+      <option value="pavimento">SOP-04 — Bio Treatment</option>
     </select>
     <div class="resultado" id="resultado-diagnostico"></div>
     <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('resultado-diagnostico')">Copiar</button>
@@ -269,10 +269,10 @@
 
     <label for="orc-servico">Serviço</label>
     <select id="orc-servico" onchange="atualizarUnidade()">
-      <option value="telhado">SoftWash Telhado</option>
-      <option value="fachada">SoftWash Fachada</option>
-      <option value="solar">SolarCare Painéis</option>
-      <option value="pavimento">PressWash Pavimentos</option>
+      <option value="telhado">Roof Care</option>
+      <option value="fachada">Facade Treatment</option>
+      <option value="solar">Solar Care</option>
+      <option value="pavimento">Bio Treatment</option>
     </select>
 
     <label id="label-quantidade" for="orc-quantidade">Área (m²)</label>
@@ -375,8 +375,8 @@ const ZONAS = {
 };
 const MINIMOS = { telhado: 350, fachada: 300, solar: 120, pavimento: 150 };
 const NOMES_SERVICO = {
-  telhado: "SoftWash Telhado", fachada: "SoftWash Fachada",
-  solar: "SolarCare Painéis", pavimento: "PressWash Pavimentos",
+  telhado: "Roof Care", fachada: "Facade Treatment",
+  solar: "Solar Care", pavimento: "Bio Treatment",
 };
 const UNIDADE = { telhado: "m²", fachada: "m²", solar: "painéis", pavimento: "m²" };
 

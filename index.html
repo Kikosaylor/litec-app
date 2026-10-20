@@ -184,6 +184,27 @@
   .historico-item .linha1 { font-weight: 600; }
   .historico-item .linha2 { color: var(--texto-suave); }
 
+  .alerta-parar {
+    background: #FDECEA; border: 2px solid var(--erro); color: #8B1A12;
+    border-radius: 10px; padding: 12px 14px; font-size: 14px; margin: 12px 0;
+  }
+  .alerta-parar strong { display: block; font-size: 15px; margin-bottom: 4px; }
+  .protocolo-box { border-top: 1px solid var(--borda); margin-top: 14px; padding-top: 12px; }
+  .protocolo-box h3 { font-size: 14px; margin: 0 0 8px; color: var(--azul); }
+  .conf { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+  .conf-fonte { background: #E3F6EA; color: #0B6B32; }
+  .conf-pratica_setor { background: #FFF4E5; color: #8A5A00; }
+  .conf-a_validar { background: #FDECEA; color: #8B1A12; }
+  ul.lista { margin: 6px 0 0; padding-left: 20px; font-size: 13px; line-height: 1.5; }
+  details { margin-top: 8px; }
+  details summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--azul); padding: 4px 0; }
+  .calc-res { display: flex; gap: 8px; margin-top: 12px; }
+  .calc-res div { flex: 1; background: var(--fundo); border: 1px solid var(--borda); border-radius: 8px; padding: 10px; text-align: center; }
+  .calc-res .n { font-size: 20px; font-weight: 800; color: var(--azul); }
+  .calc-res .l { font-size: 11px; color: var(--texto-suave); }
+  .qa { font-size: 13px; margin: 8px 0; }
+  .qa .r { color: var(--texto-suave); margin-top: 4px; }
+
   .aviso-config {
     background: #FFF4E5;
     border: 1px solid #FFD08A;
@@ -207,6 +228,7 @@
 <nav class="tabs">
   <button id="tab-btn-diagnostico" class="ativo" onclick="mudarTab('diagnostico')">📷 Diagnóstico</button>
   <button id="tab-btn-orcamento" onclick="mudarTab('orcamento')">💶 Orçamento</button>
+  <button id="tab-btn-campo" onclick="mudarTab('campo')">🧰 Campo</button>
 </nav>
 
 <main>
@@ -250,8 +272,17 @@
       <option value="pavimento">SOP-04 — Bio Treatment</option>
     </select>
     <div class="resultado" id="resultado-diagnostico"></div>
+
+    <label for="diag-superficie">Superfície (confirma ou corrige)</label>
+    <select id="diag-superficie" onchange="recalcularProtocolo()"></select>
+    <label for="diag-contaminante">Sujidade principal (confirma ou corrige)</label>
+    <select id="diag-contaminante" onchange="recalcularProtocolo()"></select>
+
+    <div id="diag-parar" class="alerta-parar" style="display:none;"></div>
+    <div id="diag-protocolo" class="protocolo-box" style="display:none;"></div>
+
     <button class="secundario" style="margin-top:10px;" onclick="copiarTexto('resultado-diagnostico')">Copiar</button>
-    <button class="secundario" style="margin-top:10px;" onclick="usarNoOrcamento()">Usar no Orçamento →</button>
+    <button class="secundario" id="btn-usar-orcamento" style="margin-top:10px;" onclick="usarNoOrcamento()">Usar no Orçamento →</button>
   </div>
 
 </section>
@@ -356,6 +387,70 @@
 
 </section>
 
+<!-- ================= CAMPO (base de conhecimento) ================= -->
+<section id="painel-campo" class="painel">
+
+  <div id="kb-erro" class="aviso-config" style="display:none;"></div>
+
+  <div class="card">
+    <h2>Calculadora de diluição</h2>
+    <label for="calc-total">Mistura final (litros)</label>
+    <input type="number" id="calc-total" min="0" step="1" value="20" oninput="calcularDiluicao()">
+    <label for="calc-alvo">Concentração pretendida (%)</label>
+    <input type="number" id="calc-alvo" min="0" step="0.1" value="3" oninput="calcularDiluicao()">
+    <label for="calc-produto">Concentração do hipoclorito no rótulo (%)</label>
+    <input type="number" id="calc-produto" min="0" step="0.5" value="12.5" oninput="calcularDiluicao()">
+    <div class="calc-res">
+      <div><div class="n" id="calc-sh">–</div><div class="l">L de hipoclorito</div></div>
+      <div><div class="n" id="calc-agua">–</div><div class="l">L de água</div></div>
+      <div><div class="n" id="calc-surf">–</div><div class="l">L surfactante (ref. 1:50)</div></div>
+    </div>
+    <div id="calc-erro" class="erro-msg"></div>
+    <div style="font-size:12px; color:var(--texto-suave); margin-top:10px;" id="calc-aviso"></div>
+  </div>
+
+  <div class="card">
+    <h2>Matriz químico × suporte</h2>
+    <div id="matriz-quimica"></div>
+  </div>
+
+  <div class="card">
+    <h2>Produtos químicos</h2>
+    <div id="lista-produtos"></div>
+  </div>
+
+  <div class="card">
+    <h2>Checklists do serviço</h2>
+    <details open><summary>Antes do serviço</summary><div id="chk-pre"></div></details>
+    <details><summary>Depois do serviço</summary><div id="chk-pos"></div></details>
+    <button class="secundario" style="margin-top:10px;" onclick="renderChecklists()">Limpar visto</button>
+  </div>
+
+  <div class="card">
+    <h2>Segurança</h2>
+    <ul class="lista" id="seg-regras"></ul>
+    <details><summary>Não trabalhar com…</summary><ul class="lista" id="seg-meteo"></ul></details>
+    <details><summary>Primeiros socorros químicos</summary><div class="qa" id="seg-socorros"></div></details>
+  </div>
+
+  <div class="card">
+    <h2>Protocolos</h2>
+    <div id="lista-protocolos"></div>
+  </div>
+
+  <div class="card">
+    <h2>Formação</h2>
+    <div id="lista-formacao"></div>
+  </div>
+
+  <div class="card">
+    <h2>Venda — FAQ e objeções</h2>
+    <div id="lista-venda"></div>
+  </div>
+
+  <div style="font-size:11px; color:var(--texto-suave); text-align:center;" id="kb-versao"></div>
+</section>
+
 </main>
 
 <script>
@@ -366,14 +461,13 @@
 const API_ENDPOINT = "https://litec-diagnostiscan.fap-antunes.workers.dev";
 
 // ==========================================================================
-// PRICEBOOK — Referência R8 (zonas + majoradores)
+// PRICEBOOK — Referência R8. Vive em base_conhecimento.json (secção "precario"),
+// que é a fonte única para a app e para o Excel de preços. Preenchido em carregarBase().
 // ==========================================================================
-const ZONAS = {
-  ultra:   { nome: "Ultra-Premium", telhado: [10,14], fachada: [9,12], solar: [7,12], pavimento: [5,8] },
-  premium: { nome: "Premium",       telhado: [8,12],  fachada: [7,10], solar: [6,9],  pavimento: [4,6] },
-  urbana:  { nome: "Urbana",        telhado: [7,10],  fachada: [6,9],  solar: [4,8],  pavimento: [3,5] },
-};
-const MINIMOS = { telhado: 350, fachada: 300, solar: 120, pavimento: 150 };
+let ZONAS = null;
+let MINIMOS = null;
+let MAJ = null;
+let DESCONTO_MAX = 15;
 const NOMES_SERVICO = {
   telhado: "Roof Care", fachada: "Facade Treatment",
   solar: "Solar Care", pavimento: "Bio Treatment",
@@ -501,6 +595,13 @@ function renderDiagnostico(diagnosis) {
   // Fallback: se o worker não conseguiu estruturar em JSON, mostra o texto tal e qual.
   if (typeof diagnosis === 'string') {
     el.textContent = diagnosis;
+    ultimoDiagnostico = null;
+    contaminantesIA = [];
+    if (KB) {
+      document.getElementById('diag-superficie').value = '';
+      document.getElementById('diag-contaminante').value = '';
+      recalcularProtocolo();
+    }
     return;
   }
 
@@ -526,11 +627,163 @@ function renderDiagnostico(diagnosis) {
   html += linha('Produto e diluição', d.produto_diluicao);
   html += linha('Pressão recomendada', d.pressao);
   html += linha('Riscos / avisos', d.riscos);
+  if (d.confianca) html += linha('Confiança da IA', d.confianca);
 
   el.innerHTML = html || '<em>Sem resposta estruturada — tenta novamente.</em>';
+
+  // Liga à base: a IA sugere superfície/sujidade; o protocolo é decidido aqui, pela base.
+  if (KB) {
+    if (d.superficie_id) document.getElementById('diag-superficie').value = d.superficie_id;
+    const conts = Array.isArray(d.contaminante_ids) ? d.contaminante_ids : [];
+    // Se a IA viu um contaminante que obriga a parar, é esse que fica selecionado.
+    const critico = conts.find(c => CONTAMINANTES_PARAR.includes(c));
+    document.getElementById('diag-contaminante').value = critico || conts[0] || '';
+    contaminantesIA = conts;
+    recalcularProtocolo();
+  }
+}
+
+// ==========================================================================
+// BASE DE CONHECIMENTO (base_conhecimento.json — fonte única, também usada pelo worker)
+// ==========================================================================
+let KB = null;
+let contaminantesIA = [];
+let protocoloAtual = null;
+const SUPERFICIES_PARAR = ['fibrocimento'];
+const CONTAMINANTES_PARAR = ['eflorescencias', 'ferrugem'];
+const NOMES_CONF = { fonte: 'confirmado', pratica_setor: 'prática do setor', a_validar: 'a validar' };
+
+async function carregarBase() {
+  try {
+    const r = await fetch('base_conhecimento.json', { cache: 'no-cache' });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    KB = await r.json();
+  } catch (e) {
+    const el = document.getElementById('kb-erro');
+    el.textContent = '⚠️ Não foi possível carregar a base de conhecimento (' + e.message + '). ' +
+      'O diagnóstico IA e o orçamento continuam a funcionar; protocolos, calculadora e checklists não.';
+    el.style.display = 'block';
+    return;
+  }
+  aplicarPrecario();
+  preencherSelectsDiagnostico();
+  renderCampo();
+}
+
+function aplicarPrecario() {
+  const pr = KB.precario;
+  ZONAS = pr.zonas;
+  MINIMOS = pr.minimos_por_servico;
+  MAJ = pr.majoradores;
+  DESCONTO_MAX = pr.desconto_max_pct;
+  document.getElementById('orc-zona').innerHTML = Object.entries(ZONAS)
+    .map(([k, z]) => `<option value="${k}">${escapeHtml(z.nome)} (${escapeHtml(z.exemplos)})</option>`).join('');
+  const lbl = (id, t) => { document.querySelector(`label[for="${id}"]`).textContent = t; };
+  lbl('maj-altura6', `Altura > 6 metros (×${MAJ.altura_6m})`);
+  lbl('maj-altura9', `Altura > 9 metros — MEWP (+€${MAJ.altura_9m_mewp_fixo} fixo)`);
+  lbl('maj-inclinacao', `Inclinação do telhado > 35° (×${MAJ.inclinacao_35})`);
+  document.getElementById('maj-contaminacao').innerHTML =
+    `<option value="1">Normal</option>` +
+    `<option value="${MAJ.contaminacao_severa}">Severa (×${MAJ.contaminacao_severa})</option>` +
+    `<option value="${MAJ.contaminacao_muito_severa}">Muito severa (×${MAJ.contaminacao_muito_severa})</option>`;
+  lbl('orc-desconto', `Desconto cross-selling (máx. ${DESCONTO_MAX}%)`);
+  document.getElementById('orc-desconto').max = DESCONTO_MAX;
+  atualizarUnidade();
+}
+
+function preencherSelectsDiagnostico() {
+  const sel = document.getElementById('diag-superficie');
+  sel.innerHTML = '<option value="">— escolher —</option>' + KB.pilares.map(p => {
+    const ops = KB.superficies.filter(s => s.pilar === p.id)
+      .map(s => `<option value="${s.id}">${escapeHtml(s.nome)}</option>`).join('');
+    return ops ? `<optgroup label="${escapeHtml(p.nome)}">${ops}</optgroup>` : '';
+  }).join('');
+  document.getElementById('diag-contaminante').innerHTML = '<option value="">— escolher —</option>' +
+    KB.contaminantes.map(c => `<option value="${c.id}">${escapeHtml(c.nome)}</option>`).join('');
+}
+
+// Regra determinística: a paragem não depende da IA acertar no protocolo.
+function encontrarProtocolo(supId, contId) {
+  if (!KB || !supId) return null;
+  const parar = SUPERFICIES_PARAR.includes(supId) || CONTAMINANTES_PARAR.includes(contId);
+  const candidatos = KB.protocolos.filter(p => p.superficies.includes(supId));
+  if (parar) {
+    return KB.protocolos.find(p => p.parar &&
+      (p.superficies.includes(supId) && SUPERFICIES_PARAR.includes(supId) ||
+       p.contaminantes.includes(contId))) || null;
+  }
+  return candidatos.find(p => !p.parar && p.contaminantes.includes(contId))
+      || candidatos.find(p => !p.parar)
+      || null;
+}
+
+function recalcularProtocolo() {
+  const supId = document.getElementById('diag-superficie').value;
+  const contId = document.getElementById('diag-contaminante').value;
+  // Qualquer contaminante crítico visto pela IA continua a contar, mesmo que não seja o selecionado.
+  const contCritico = CONTAMINANTES_PARAR.includes(contId) ? contId
+    : contaminantesIA.find(c => CONTAMINANTES_PARAR.includes(c));
+  protocoloAtual = encontrarProtocolo(supId, contCritico || contId);
+  renderProtocolo(protocoloAtual, supId);
+}
+
+function renderProtocolo(p, supId) {
+  const boxParar = document.getElementById('diag-parar');
+  const box = document.getElementById('diag-protocolo');
+  const btnOrc = document.getElementById('btn-usar-orcamento');
+  boxParar.style.display = 'none';
+  box.style.display = 'none';
+  btnOrc.disabled = false;
+  btnOrc.textContent = 'Usar no Orçamento →';
+
+  if (!p) {
+    if (supId) {
+      box.innerHTML = '<h3>Sem protocolo na base para esta combinação</h3>' +
+        '<div style="font-size:13px;">Não há receita validada. Teste pequeno, foto e registo antes de orçamentar.</div>';
+      box.style.display = 'block';
+    }
+    return;
+  }
+
+  if (p.parar) {
+    boxParar.innerHTML = `<strong>⛔ PARAR — ${escapeHtml(p.titulo)} (${p.id})</strong>${escapeHtml(p.acao || '')}`;
+    boxParar.style.display = 'block';
+    btnOrc.disabled = true;
+    btnOrc.textContent = 'Orçamento bloqueado — ver aviso';
+    return;
+  }
+
+  const sup = KB.superficies.find(s => s.id === supId);
+  const pilar = KB.pilares.find(x => x.id === p.pilar);
+  const conf = `<span class="conf conf-${p.confianca}">${NOMES_CONF[p.confianca] || p.confianca}</span>`;
+  const li = arr => (arr && arr.length) ? '<ul class="lista">' + arr.map(x => `<li>${escapeHtml(x)}</li>`).join('') + '</ul>' : '';
+  let html = `<h3>${p.id} — ${escapeHtml(p.titulo)} ${conf}</h3>`;
+  const linha = (rot, val) => val ? `<div class="diag-linha"><span class="rotulo">${rot}</span><span class="valor">${escapeHtml(val)}</span></div>` : '';
+  html += linha('Método', p.metodo);
+  html += linha('Mistura (base)', p.mistura);
+  html += linha('Tempo de atuação (min)', p.tempo_atuacao_min);
+  if (sup) html += linha('Pressão para esta superfície', sup.pressao);
+  if (sup) html += linha('Atenção à superfície', sup.notas);
+  html += linha('Ajuste', p.regra_ajuste);
+  html += linha('Avisar o cliente', p.avisar_cliente);
+  html += linha('Limites', p.limites);
+  if (p.regras_criticas) html += `<details open><summary>Regras críticas</summary>${li(p.regras_criticas)}</details>`;
+  if (p.contraindicacoes) html += `<details open><summary>Não fazer se…</summary>${li(p.contraindicacoes)}</details>`;
+  if (p.passos) html += `<details><summary>Passos (${p.passos.length})</summary>${li(p.passos)}</details>`;
+  if (!p.sop_app) {
+    html += `<div class="aviso-config" style="margin-top:10px;">Pilar ${escapeHtml(pilar ? pilar.nome : p.pilar)} — fora da Fase 0, sem tabela de preços na app.</div>`;
+    btnOrc.disabled = true;
+    btnOrc.textContent = 'Sem preçário para este pilar';
+  }
+  box.innerHTML = html;
+  box.style.display = 'block';
 }
 
 function usarNoOrcamento() {
+  if (protocoloAtual && protocoloAtual.parar) return;
+  if (protocoloAtual && protocoloAtual.sop_app) {
+    document.getElementById('sop-tipo').value = protocoloAtual.sop_app;
+  }
   document.getElementById('orc-servico').value = document.getElementById('sop-tipo').value;
   atualizarUnidade();
   if (ultimoDiagnostico) {
@@ -554,6 +807,7 @@ function atualizarUnidade() {
 }
 
 function calcularOrcamento(finalizar) {
+  if (!ZONAS) return null; // preçário ainda não carregado
   const zonaKey = document.getElementById('orc-zona').value;
   const servico = document.getElementById('orc-servico').value;
   const quantidade = parseFloat(document.getElementById('orc-quantidade').value) || 0;
@@ -569,22 +823,22 @@ function calcularOrcamento(finalizar) {
   let subtotal = precoUnidade * quantidade;
 
   // Majoradores multiplicativos
-  if (document.getElementById('maj-altura6').checked) subtotal *= 1.15;
-  if (servico === 'telhado' && document.getElementById('maj-inclinacao').checked) subtotal *= 1.20;
+  if (document.getElementById('maj-altura6').checked) subtotal *= MAJ.altura_6m;
+  if (servico === 'telhado' && document.getElementById('maj-inclinacao').checked) subtotal *= MAJ.inclinacao_35;
   subtotal *= parseFloat(document.getElementById('maj-contaminacao').value);
 
   // Majorador fixo
-  if (document.getElementById('maj-altura9').checked) subtotal += 250;
+  if (document.getElementById('maj-altura9').checked) subtotal += MAJ.altura_9m_mewp_fixo;
 
   // Mínimo do serviço
   subtotal = Math.max(subtotal, MINIMOS[servico]);
 
-  // Desconto (máx. 15%)
+  // Desconto (máximo definido no preçário)
   let desconto = parseFloat(document.getElementById('orc-desconto').value) || 0;
   const avisoDesconto = document.getElementById('aviso-desconto');
-  if (desconto > 15) {
-    desconto = 15;
-    avisoDesconto.textContent = 'Desconto máximo acumulado permitido é 15% — ajustado automaticamente.';
+  if (desconto > DESCONTO_MAX) {
+    desconto = DESCONTO_MAX;
+    avisoDesconto.textContent = `Desconto máximo acumulado permitido é ${DESCONTO_MAX}% — ajustado automaticamente.`;
   } else {
     avisoDesconto.textContent = '';
   }
@@ -603,7 +857,10 @@ function calcularOrcamento(finalizar) {
 
 async function gerarProposta() {
   const dados = calcularOrcamento(true);
-  if (!dados) return;
+  if (!dados) {
+    document.getElementById('orc-erro').textContent = 'Preçário não carregado — recarrega a página.';
+    return;
+  }
 
   const erroEl = document.getElementById('orc-erro');
   erroEl.textContent = '';
@@ -696,7 +953,109 @@ function copiarTexto(elementId) {
   });
 }
 
+// ==========================================================================
+// SEPARADOR CAMPO
+// ==========================================================================
+function calcularDiluicao() {
+  const total = parseFloat(document.getElementById('calc-total').value) || 0;
+  const alvo = parseFloat(document.getElementById('calc-alvo').value) || 0;
+  const prod = parseFloat(document.getElementById('calc-produto').value) || 0;
+  const erro = document.getElementById('calc-erro');
+  erro.textContent = '';
+  const set = (sh, agua, surf) => {
+    document.getElementById('calc-sh').textContent = sh;
+    document.getElementById('calc-agua').textContent = agua;
+    document.getElementById('calc-surf').textContent = surf;
+  };
+  if (!total || !alvo || !prod) { set('–', '–', '–'); return; }
+  if (alvo >= prod) {
+    erro.textContent = 'A concentração pretendida tem de ser menor do que a do produto.';
+    set('–', '–', '–');
+    return;
+  }
+  const sh = total * (alvo / prod);
+  const fmt = n => n.toLocaleString('pt-PT', { maximumFractionDigits: 2 });
+  set(fmt(sh), fmt(total - sh), fmt(total / 50));
+}
+
+function renderChecklists() {
+  const mk = (arr, pref) => arr.map((t, i) =>
+    `<div class="checkbox-row"><input type="checkbox" id="${pref}${i}"><label for="${pref}${i}">${escapeHtml(t)}</label></div>`
+  ).join('');
+  document.getElementById('chk-pre').innerHTML = mk(KB.checklists.pre_servico, 'chkpre');
+  document.getElementById('chk-pos').innerHTML = mk(KB.checklists.pos_servico, 'chkpos');
+}
+
+function renderCampo() {
+  const li = arr => arr.map(x => `<li>${escapeHtml(x)}</li>`).join('');
+  document.getElementById('calc-aviso').textContent =
+    KB.diluicao.aviso + ' Ordem: ' + KB.diluicao.ordem_mistura.join(' → ') + '.';
+  calcularDiluicao();
+  renderChecklists();
+
+  const mq = KB.matriz_quimica;
+  const cor = v => v.startsWith('NÃO') ? '#8B1A12' : v.startsWith('SIM') ? '#0B6B32' : '#8A5A00';
+  document.getElementById('matriz-quimica').innerHTML =
+    `<div style="overflow-x:auto;"><table style="width:100%; border-collapse:collapse; font-size:12px;">` +
+    `<tr><th style="text-align:left; padding:6px; border-bottom:1px solid var(--borda);">Suporte</th><th style="padding:6px; border-bottom:1px solid var(--borda);">Alcalino</th><th style="padding:6px; border-bottom:1px solid var(--borda);">Ácido suave</th><th style="padding:6px; border-bottom:1px solid var(--borda);">Hipoclorito</th></tr>` +
+    mq.linhas.map(l => `<tr><td style="padding:6px; border-bottom:1px solid var(--borda);">${escapeHtml(l.suporte)}</td>` +
+      mq.colunas.map(c => `<td style="padding:6px; text-align:center; font-weight:700; color:${cor(l[c])}; border-bottom:1px solid var(--borda);">${escapeHtml(l[c])}</td>`).join('') + '</tr>').join('') +
+    `</table></div><div class="qa" style="color:var(--texto-suave);">${escapeHtml(mq.nota)}</div>`;
+
+  document.getElementById('lista-produtos').innerHTML = KB.produtos.map(p => {
+    const linhas = [];
+    if (p.funcao) linhas.push(`<div class="qa">${escapeHtml(p.funcao)}</div>`);
+    if (p.concentracao_comercial) linhas.push(`<div class="qa"><strong>Concentração:</strong> ${escapeHtml(p.concentracao_comercial)}</div>`);
+    if (p.uso) linhas.push(`<div class="qa"><strong>Uso:</strong> ${escapeHtml(p.uso)}</div>`);
+    if (p.incompativeis) linhas.push(`<div class="qa"><strong>⚠️ Nunca com:</strong><ul class="lista">${li(p.incompativeis)}</ul></div>`);
+    if (p.regras) linhas.push(`<ul class="lista">${li(p.regras)}</ul>`);
+    if (p.cuidados) linhas.push(`<ul class="lista">${li(p.cuidados)}</ul>`);
+    if (p.epi) linhas.push(`<div class="qa"><strong>EPI:</strong> ${escapeHtml(p.epi.join(', '))}</div>`);
+    if (p.compra) {
+      const c = p.compra;
+      linhas.push(`<div class="qa"><strong>Comprar:</strong> ${escapeHtml(c.procurar)}<ul class="lista">${li(c.confirmar)}</ul>` +
+        `<strong>Não serve:</strong><ul class="lista">${li(c.nao_serve)}</ul>` +
+        `<div class="r">${escapeHtml(c.comparar_fornecedores)}. ${escapeHtml(c.transporte)}</div></div>`);
+    }
+    if (p.teste_validacao) linhas.push(`<div class="qa"><strong>Teste:</strong> ${escapeHtml(p.teste_validacao)}</div>`);
+    return `<details><summary>${escapeHtml(p.nome)} <span class="conf conf-${p.confianca}">${NOMES_CONF[p.confianca]}</span></summary>${linhas.join('')}</details>`;
+  }).join('');
+
+  document.getElementById('seg-regras').innerHTML = li(KB.seguranca.regras_absolutas);
+  document.getElementById('seg-meteo').innerHTML = li(KB.seguranca.condicoes_meteo_nao_trabalhar);
+  document.getElementById('seg-socorros').textContent = KB.seguranca.primeiros_socorros_quimicos;
+
+  document.getElementById('lista-protocolos').innerHTML = KB.pilares.map(pl => {
+    const ps = KB.protocolos.filter(p => p.pilar === pl.id);
+    if (!ps.length) return '';
+    return `<div style="font-size:12px; font-weight:700; color:var(--texto-suave); margin-top:10px;">${escapeHtml(pl.nome)}</div>` +
+      ps.map(p => {
+        const det = [p.mistura && 'Mistura: ' + p.mistura, p.acao, p.tempo_atuacao_min && 'Atuação: ' + p.tempo_atuacao_min + ' min']
+          .filter(Boolean).map(x => `<div class="qa">${escapeHtml(x)}</div>`).join('');
+        const passos = (p.passos || p.regras_criticas) ? `<ul class="lista">${li(p.passos || p.regras_criticas)}</ul>` : '';
+        return `<details><summary>${p.parar ? '⛔ ' : ''}${p.id} — ${escapeHtml(p.titulo)} <span class="conf conf-${p.confianca}">${NOMES_CONF[p.confianca]}</span></summary>${det}${passos}</details>`;
+      }).join('');
+  }).join('');
+
+  document.getElementById('lista-formacao').innerHTML = KB.formacao.map(f => {
+    const qs = (f.verificacao || []).map(q =>
+      `<div class="qa"><div><strong>❓ ${escapeHtml(q.pergunta)}</strong></div><details><summary>Ver resposta</summary><div class="r">${escapeHtml(q.resposta)}</div></details></div>`
+    ).join('');
+    return `<details><summary>${f.id} — ${escapeHtml(f.titulo)}</summary><ul class="lista">${li(f.conteudo)}</ul>${qs}</details>`;
+  }).join('');
+
+  const v = KB.venda;
+  document.getElementById('lista-venda').innerHTML =
+    `<details><summary>Explicar ao cliente</summary>${v.explicacoes_simples.map(e => `<div class="qa"><strong>${escapeHtml(e.tema)}</strong><div class="r">${escapeHtml(e.texto)}</div></div>`).join('')}</details>` +
+    `<details><summary>Perguntas frequentes</summary>${v.faq.map(q => `<div class="qa"><strong>${escapeHtml(q.p)}</strong><div class="r">${escapeHtml(q.r)}</div></div>`).join('')}</details>` +
+    `<details><summary>Objeções</summary>${v.objecoes.map(o => `<div class="qa"><strong>"${escapeHtml(o.objecao)}"</strong><div class="r">${escapeHtml(o.resposta)}</div></div>`).join('')}</details>` +
+    `<div class="qa" style="color:var(--texto-suave);">${escapeHtml(v.nota_estrategica)}</div>`;
+
+  document.getElementById('kb-versao').textContent = `Base de conhecimento v${KB.meta.versao} · ${KB.meta.data}`;
+}
+
 // Inicialização
+carregarBase();
 if (!API_ENDPOINT) {
   document.getElementById('aviso-endpoint').style.display = 'block';
 }

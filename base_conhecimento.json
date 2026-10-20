@@ -1,0 +1,1234 @@
+{
+  "meta": {
+    "nome": "LITEC — Base de Conhecimento DiagnostiScan",
+    "versao": "0.3",
+    "data": "2026-10-19",
+    "idioma": "pt-PT",
+    "usos": [
+      "diagnostico_campo",
+      "formacao_operador",
+      "venda_cliente"
+    ],
+    "niveis_confianca": {
+      "fonte": "Confirmado em ficha técnica, fabricante ou norma",
+      "pratica_setor": "Prática corrente do setor (UK/EUA) — confirmar com FDS do produto que comprares em PT",
+      "a_validar": "Hipótese de trabalho — validar em campo e registar resultado antes de usar como regra"
+    },
+    "aviso_geral": "Concentrações e tempos são pontos de partida. A regra final é sempre: ficha técnica (FDS) do produto concreto + teste numa zona escondida + registo do resultado.",
+    "estado_pilares": {
+      "softwash": "Fase 0 — conteúdo mais desenvolvido",
+      "solar_care": "Fase 0 — conteúdo mais desenvolvido",
+      "campos_desportivos": "Não validado por piloto — conteúdo base",
+      "espacos_jogo_infantil": "Não validado por piloto — conteúdo base",
+      "higiene_desinfecao": "Não validado por piloto — conteúdo base, forte componente regulatória"
+    },
+    "alteracoes_0_2": [
+      "Capoto/ETICS: retirado o intervalo 1–3% herdado de reboco; começa abaixo de 0,5% e marcado a_validar (alinhado com o antigo SOP-02 do worker)",
+      "Calçada portuguesa: marcada como calcário — nunca ácidos (o antigo SOP-04 do worker mandava ácido cítrico a 5%, o que contradizia a regra do calcário)",
+      "Protocolos ganham sop_app (ligação ao orçamento) e parar (true = a app bloqueia o orçamento)"
+    ],
+    "posicionamento": {
+      "regra": "A LITEC vende manutenção técnica de ativos exteriores, não limpeza. O cliente compra preservar o telhado/fachada, evitar reparações e recuperar a produção dos painéis.",
+      "onde_usar_limpeza": "Só nas categorias do Google, nas palavras-chave e nos títulos de serviço, porque é o que o cliente pesquisa ('limpeza de telhados'). Nas descrições, propostas e conversas usa-se manutenção/tratamento.",
+      "zona_fase0": "Esforço comercial 100% Almada; perfil Google com Almada + Seixal. Alargar só com agenda cheia em Almada 2–3 meses seguidos."
+    },
+    "alteracoes_0_3": [
+      "Posicionamento 'manutenção técnica' (conversa Google Business, 19/10) aplicado aos textos de venda",
+      "Algicida preventivo e incompatibilidade amónio quaternário × hipoclorito (conversa Hipoclorito 15%, 18/10)",
+      "Critérios de compra do hipoclorito: cloro líquido de piscina não estabilizado ≥12,5% (conversas Hipoclorito/Garrafão, 17–19/10)",
+      "Matriz químico × suporte do Guião de Visita B2B passa a viver aqui (fonte única)",
+      "Preçário da app (Referência R8) passa a viver aqui (fonte única para app e Excel)"
+    ]
+  },
+  "pilares": [
+    {
+      "id": "softwash",
+      "nome": "SoftWash",
+      "ambito": "Telhados, fachadas, muros, pavimentos — remoção de sujidade biológica e atmosférica a baixa pressão com química controlada"
+    },
+    {
+      "id": "solar_care",
+      "nome": "Solar Care",
+      "ambito": "Limpeza e inspeção visual de painéis fotovoltaicos sem comprometer a garantia do fabricante"
+    },
+    {
+      "id": "campos_desportivos",
+      "nome": "Campos Desportivos",
+      "ambito": "Padel e ténis — relva sintética, vidros, vedações, drenagem"
+    },
+    {
+      "id": "espacos_jogo_infantil",
+      "nome": "Espaços de Jogo Infantil",
+      "ambito": "Limpeza e higienização de equipamentos e pavimentos de parques infantis; NÃO substitui inspeção certificada"
+    },
+    {
+      "id": "higiene_desinfecao",
+      "nome": "Higiene & Desinfeção Ambiental",
+      "ambito": "Desinfeção de superfícies exteriores e zonas comuns com biocidas autorizados"
+    }
+  ],
+  "superficies": [
+    {
+      "id": "telha_ceramica",
+      "pilar": "softwash",
+      "nome": "Telha cerâmica",
+      "sensibilidade": "media",
+      "pressao": "baixa (softwash); nunca alta pressão — parte vidrado e abre poros",
+      "notas": "Muito comum em PT. Risco principal: queda em altura e telhas partidas ao pisar."
+    },
+    {
+      "id": "telha_betao",
+      "pilar": "softwash",
+      "nome": "Telha de betão",
+      "sensibilidade": "media",
+      "pressao": "baixa",
+      "notas": "Mais porosa — retém mais biologia, pode precisar de 2.ª aplicação."
+    },
+    {
+      "id": "fibrocimento",
+      "pilar": "softwash",
+      "nome": "Fibrocimento (placas onduladas)",
+      "sensibilidade": "critica",
+      "pressao": "NÃO INTERVIR sem confirmar ausência de amianto",
+      "notas": "Placas antigas (pré-2005) podem conter amianto. Não lavar, não escovar, não pisar. Encaminhar para empresa certificada."
+    },
+    {
+      "id": "reboco_pintado",
+      "pilar": "softwash",
+      "nome": "Reboco / fachada pintada",
+      "sensibilidade": "media",
+      "pressao": "baixa",
+      "notas": "Testar sempre: algumas tintas descoloram com hipoclorito."
+    },
+    {
+      "id": "capoto_etics",
+      "pilar": "softwash",
+      "nome": "Capoto (ETICS)",
+      "sensibilidade": "alta",
+      "pressao": "muito baixa",
+      "notas": "Isolamento exterior (som oco ao bater, juntas visíveis). Alta pressão rasga o acabamento e mete água no isolante. Química no mínimo e teste obrigatório."
+    },
+    {
+      "id": "pedra_natural",
+      "pilar": "softwash",
+      "nome": "Pedra natural (calcário, granito)",
+      "sensibilidade": "alta",
+      "pressao": "baixa",
+      "notas": "Calcário e mármore reagem a ácidos — dano irreversível. Granito tolera mais. Testar sempre."
+    },
+    {
+      "id": "azulejo_fachada",
+      "pilar": "softwash",
+      "nome": "Azulejo de fachada",
+      "sensibilidade": "alta",
+      "pressao": "baixa",
+      "notas": "Azulejos antigos podem ter vidrado frágil e juntas degradadas. Verificar azulejos soltos antes — reportar ao cliente."
+    },
+    {
+      "id": "pavimento_betao",
+      "pilar": "softwash",
+      "nome": "Pavimento de betão / pavê",
+      "sensibilidade": "baixa",
+      "pressao": "média-alta permitida (surface cleaner)",
+      "notas": "Aqui alta pressão + pré-tratamento é aceitável. Cuidado com areia das juntas do pavê."
+    },
+    {
+      "id": "calcada_portuguesa",
+      "pilar": "softwash",
+      "nome": "Calçada portuguesa",
+      "sensibilidade": "media",
+      "pressao": "média",
+      "notas": "É calcário — nunca ácidos. Alta pressão solta pedras. Preferir pré-tratamento + pressão moderada."
+    },
+    {
+      "id": "madeira_deck",
+      "pilar": "softwash",
+      "nome": "Madeira / deck",
+      "sensibilidade": "alta",
+      "pressao": "baixa",
+      "notas": "Hipoclorito pode desbotar e degradar fibra. Preferir percarbonato de sódio."
+    },
+    {
+      "id": "pvc_aluminio",
+      "pilar": "softwash",
+      "nome": "Caixilharia PVC / alumínio lacado",
+      "sensibilidade": "media",
+      "pressao": "baixa",
+      "notas": "Hipoclorito seco deixa marcas no lacado e vidro — enxaguar abundantemente."
+    },
+    {
+      "id": "painel_fv_vidro",
+      "pilar": "solar_care",
+      "nome": "Painel fotovoltaico (vidro com moldura)",
+      "sensibilidade": "alta",
+      "pressao": "água a baixa pressão; nunca máquina de alta pressão",
+      "notas": "Vidro tem revestimento antirreflexo. Seguir manual do fabricante para manter garantia."
+    },
+    {
+      "id": "relva_sintetica_padel",
+      "pilar": "campos_desportivos",
+      "nome": "Relva sintética com areia (padel)",
+      "sensibilidade": "alta",
+      "pressao": "não aplicável — escovagem e tratamento localizado",
+      "notas": "A areia regula o ressalto da bola; tem de ser redistribuída."
+    },
+    {
+      "id": "vidro_temperado_padel",
+      "pilar": "campos_desportivos",
+      "nome": "Vidro temperado de campo de padel",
+      "sensibilidade": "media",
+      "pressao": "baixa",
+      "notas": "Verificar silicones e parafusos ao limpar."
+    },
+    {
+      "id": "piso_resina_tenis",
+      "pilar": "campos_desportivos",
+      "nome": "Piso de resina acrílica (ténis)",
+      "sensibilidade": "media",
+      "pressao": "baixa-média",
+      "notas": "Alta pressão pode levantar camadas de resina."
+    },
+    {
+      "id": "pavimento_borracha_eji",
+      "pilar": "espacos_jogo_infantil",
+      "nome": "Pavimento amortecedor de borracha",
+      "sensibilidade": "alta",
+      "pressao": "baixa",
+      "notas": "É um elemento de segurança (absorção de impacto). Não danificar nem descolar."
+    },
+    {
+      "id": "equipamento_eji",
+      "pilar": "espacos_jogo_infantil",
+      "nome": "Equipamento de jogo (plástico, madeira, metal)",
+      "sensibilidade": "alta",
+      "pressao": "baixa",
+      "notas": "Contacto direto com crianças — só produtos adequados e enxaguamento total."
+    }
+  ],
+  "contaminantes": [
+    {
+      "id": "algas_verdes",
+      "nome": "Algas verdes",
+      "tipo": "biologico",
+      "sinais": "Manchas verdes, por vezes pó verde ao toque, zonas húmidas/sombra",
+      "resposta_tipica": "Hipoclorito diluído; sai rápido"
+    },
+    {
+      "id": "manchas_pretas",
+      "nome": "Manchas pretas / riscos escuros (cianobactérias, bolor)",
+      "tipo": "biologico",
+      "sinais": "Escorrências pretas em telhados e fachadas, sobretudo a norte",
+      "resposta_tipica": "Hipoclorito; pode precisar de 2.ª aplicação"
+    },
+    {
+      "id": "liquenes",
+      "nome": "Líquenes",
+      "tipo": "biologico",
+      "sinais": "Crostas circulares cinzentas, amarelas ou laranja muito agarradas",
+      "resposta_tipica": "Hipoclorito mais concentrado + tempo; morrem mas as crostas podem levar semanas a soltar com a chuva — avisar o cliente"
+    },
+    {
+      "id": "musgo",
+      "nome": "Musgo",
+      "tipo": "biologico",
+      "sinais": "Almofadas verdes espessas, juntas de telhas e pavimentos",
+      "resposta_tipica": "Remoção mecânica suave do grosso + tratamento químico"
+    },
+    {
+      "id": "sujidade_atmosferica",
+      "nome": "Sujidade atmosférica (poluição, fuligem)",
+      "tipo": "inorganico",
+      "sinais": "Acinzentado uniforme, pior junto a estradas",
+      "resposta_tipica": "Detergente + enxaguamento; hipoclorito ajuda pouco"
+    },
+    {
+      "id": "eflorescencias",
+      "nome": "Eflorescências (sais brancos)",
+      "tipo": "mineral",
+      "sinais": "Manchas brancas em tijolo, betão, juntas",
+      "resposta_tipica": "NÃO é sujidade biológica. Origem é humidade no material — informar o cliente; limpeza específica, sem hipoclorito"
+    },
+    {
+      "id": "ferrugem",
+      "nome": "Ferrugem",
+      "tipo": "mineral",
+      "sinais": "Manchas laranja/castanhas junto a metais ou rega",
+      "resposta_tipica": "Removedor de ferrugem específico; NUNCA no mesmo dia/zona que hipoclorito sem enxaguar"
+    },
+    {
+      "id": "dejetos_aves",
+      "nome": "Dejetos de aves",
+      "tipo": "biologico",
+      "sinais": "Manchas brancas concentradas; comum em painéis solares",
+      "resposta_tipica": "Amolecer com água, remover sem raspar; risco biológico — luvas e máscara"
+    },
+    {
+      "id": "graffiti",
+      "nome": "Graffiti",
+      "tipo": "tinta",
+      "sinais": "Tinta spray / marcador",
+      "resposta_tipica": "Removedor específico conforme superfície — serviço à parte, testar sempre"
+    },
+    {
+      "id": "pastilha_elastica",
+      "nome": "Pastilha elástica",
+      "tipo": "residuo",
+      "sinais": "Pontos escuros achatados em pavimentos",
+      "resposta_tipica": "Vapor ou equipamento próprio — serviço à parte"
+    },
+    {
+      "id": "po_polen",
+      "nome": "Pó e pólen",
+      "tipo": "inorganico",
+      "sinais": "Película fina; em painéis reduz produção",
+      "resposta_tipica": "Água desmineralizada + escova macia"
+    },
+    {
+      "id": "calcario_agua",
+      "nome": "Marcas de calcário (água dura)",
+      "tipo": "mineral",
+      "sinais": "Pintas brancas em vidro após secagem",
+      "resposta_tipica": "Prevenir com água desmineralizada/osmose"
+    }
+  ],
+  "produtos": [
+    {
+      "id": "hipoclorito_sodio",
+      "nome": "Hipoclorito de sódio (SH)",
+      "funcao": "Oxidante — mata e descolora algas, bolor, líquenes",
+      "concentracao_comercial": "Tipicamente 10–15% (confirmar no rótulo). Perde força com calor, luz e tempo.",
+      "riscos": "Corrosivo para pele e olhos; tóxico para plantas e vida aquática; corrói metais; descolora tecidos e algumas tintas",
+      "incompativeis": [
+        "Ácidos (inclui removedores de ferrugem e de calcário) → liberta cloro gasoso",
+        "Amoníaco → liberta cloraminas tóxicas",
+        "Algicidas de amónio quaternário (quats) → reagem e anulam-se; nunca na mesma mistura nem sem enxaguar entre aplicações",
+        "Outros produtos não especificados na FDS"
+      ],
+      "epi": [
+        "Óculos ou viseira",
+        "Luvas nitrilo compridas",
+        "Roupa impermeável",
+        "Botas"
+      ],
+      "armazenamento": "Fresco, à sombra, recipiente fechado, longe de ácidos. Rodar stock — produto velho é produto fraco.",
+      "regulacao": "Quando usado como algicida/desinfetante pode cair no âmbito dos biocidas (TP02). Usar produto com autorização e seguir o rótulo — a confirmar com o fornecedor.",
+      "confianca": "fonte",
+      "compra": {
+        "procurar": "'Cloro líquido para piscinas' (é o mesmo químico, em bidões de 20–25 L)",
+        "confirmar": [
+          "Concentração declarada ≥12,5% (≈150 g/L de cloro ativo)",
+          "NÃO estabilizado — sem ácido cianúrico (o estabilizado de piscina não serve para fachadas)",
+          "Data de fabrico recente; comprar só para 4–6 semanas de trabalho"
+        ],
+        "nao_serve": [
+          "Hipoclorito de cálcio, granulado ou pastilhas (outro composto, deixa resíduo e entope bicos)",
+          "Bidões com intervalo vago no rótulo (ex.: '5–10%') — não dá para calcular a diluição"
+        ],
+        "referencia_preco": "Ordem de grandeza em Espanha: ~0,68 €/L (20 L a 12,5%). Usar como base de negociação, não como preço PT.",
+        "comparar_fornecedores": "€ por litro de cloro ativo = preço do bidão ÷ (litros × % declarada)",
+        "transporte": "UN 1791, classe 8 (corrosivo). Separado de ácidos na carrinha.",
+        "confianca": "pratica_setor"
+      }
+    },
+    {
+      "id": "lixivia_domestica",
+      "nome": "Lixívia doméstica (só para testes)",
+      "funcao": "Substituto de hipoclorito para áreas de teste pequenas enquanto não há cloro de piscina",
+      "concentracao_comercial": "Tipicamente 3–5% de cloro ativo em PT (confirmar no rótulo). Usar a calculadora com essa %.",
+      "regras": [
+        "Só lixívia simples: sem perfume, sem gel, sem detergente adicionado",
+        "Não é para produção — custo por litro de cloro ativo muito alto"
+      ],
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "surfactante_sh",
+      "nome": "Surfactante compatível com hipoclorito",
+      "funcao": "Faz a mistura agarrar à superfície, aumenta tempo de contacto e reduz escorrência",
+      "dosagem": "Seguir fabricante. Referência comum no mercado UK: cerca de 1 parte de surfactante para 50 de solução de hipoclorito (ex.: 500 ml por 25 L).",
+      "riscos": "Irritante para a pele",
+      "nota": "Tem de ser explicitamente compatível com hipoclorito. Adicionar no fim da mistura.",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "tiossulfato_sodio",
+      "nome": "Tiossulfato de sódio (neutralizador)",
+      "funcao": "Neutraliza hipoclorito em plantas, solo e escorrências",
+      "uso": "Aplicar em vegetação e zonas sensíveis antes e depois",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "percarbonato_sodio",
+      "nome": "Percarbonato de sódio (oxigénio ativo)",
+      "funcao": "Alternativa mais suave ao hipoclorito",
+      "uso": "Madeira e sujidade ligeira; menos eficaz em biologia pesada",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "agua_desmineralizada",
+      "nome": "Água desmineralizada / osmose inversa",
+      "funcao": "Enxaguamento sem marcas de calcário",
+      "uso": "Obrigatório em painéis solares e recomendado em vidros",
+      "confianca": "fonte"
+    },
+    {
+      "id": "detergente_neutro",
+      "nome": "Detergente neutro biodegradável",
+      "funcao": "Sujidade atmosférica, gordura leve",
+      "uso": "Painéis (se o fabricante permitir), vidros, equipamentos",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "fungicida_relva_sintetica",
+      "nome": "Fungicida/algicida para relva sintética",
+      "funcao": "Tratamento localizado de musgo, algas e fungos em campos",
+      "uso": "Só nas zonas afetadas, produto específico para relva sintética",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "biocida_tp02",
+      "nome": "Desinfetante de superfícies autorizado (TP02)",
+      "funcao": "Desinfeção de superfícies não destinadas a contacto direto com pessoas ou animais",
+      "regulacao": "Em Portugal a autorização de biocidas é da DGS. Verificar n.º de autorização no rótulo e restrições de uso (profissional/não profissional, interior/exterior).",
+      "confianca": "fonte"
+    },
+    {
+      "id": "algicida_preventivo",
+      "nome": "Algicida preventivo (pós-tratamento)",
+      "funcao": "Atrasa o regresso de algas e fungos. Não dá resultado visual imediato: atua ao longo de semanas/meses com chuva e sol.",
+      "uso": "Depois do tratamento com hipoclorito e de enxaguar bem. Base para contratos de manutenção.",
+      "incompativeis": [
+        "Hipoclorito (sobretudo algicidas de amónio quaternário) — nunca misturar"
+      ],
+      "cuidados": [
+        "Algicidas à base de cobre podem manchar superfícies claras — evitar em rebocos e pedra clara",
+        "É biocida: produto autorizado e rótulo cumprido"
+      ],
+      "teste_validacao": "Limpar uma zona, tratar metade com algicida, fotografar as duas metades a 1, 3 e 6 meses. É a prova para vender manutenção preventiva.",
+      "confianca": "a_validar"
+    }
+  ],
+  "diluicao": {
+    "formula": "Litros de produto = Litros de mistura final × (% desejada ÷ % do produto)",
+    "exemplo": "Quero 20 L a 3% com SH a 12,5%: 20 × (3 ÷ 12,5) = 4,8 L de SH + 15,2 L de água",
+    "tabela_100L_sh_12_5": [
+      {
+        "alvo_pct": 1,
+        "litros_sh": 8,
+        "litros_agua": 92
+      },
+      {
+        "alvo_pct": 2,
+        "litros_sh": 16,
+        "litros_agua": 84
+      },
+      {
+        "alvo_pct": 3,
+        "litros_sh": 24,
+        "litros_agua": 76
+      },
+      {
+        "alvo_pct": 4,
+        "litros_sh": 32,
+        "litros_agua": 68
+      },
+      {
+        "alvo_pct": 5,
+        "litros_sh": 40,
+        "litros_agua": 60
+      },
+      {
+        "alvo_pct": 6,
+        "litros_sh": 48,
+        "litros_agua": 52
+      }
+    ],
+    "ordem_mistura": [
+      "Água",
+      "Hipoclorito",
+      "Surfactante no fim",
+      "Mexer suavemente"
+    ],
+    "aviso": "Se o SH estiver velho ou aquecido, a % real é menor. Se a mistura não está a funcionar no tempo esperado, o problema pode ser o produto e não a dose."
+  },
+  "protocolos": [
+    {
+      "id": "SW-01",
+      "pilar": "softwash",
+      "sop_app": "telhado",
+      "parar": false,
+      "titulo": "Telhado cerâmico/betão com algas, manchas pretas ou líquenes",
+      "superficies": [
+        "telha_ceramica",
+        "telha_betao"
+      ],
+      "contaminantes": [
+        "algas_verdes",
+        "manchas_pretas",
+        "liquenes",
+        "musgo"
+      ],
+      "metodo": "Softwash a baixa pressão",
+      "mistura": "Hipoclorito 3–6% + surfactante",
+      "tempo_atuacao_min": "10–20 (líquenes pesados podem precisar de 2.ª aplicação)",
+      "passos": [
+        "Confirmar que não é fibrocimento",
+        "Avaliar acesso e risco de queda — se não houver acesso seguro, não executar",
+        "Molhar abundantemente plantas, solo e caleiras abaixo",
+        "Proteger/cobrir plantas sensíveis e retirar objetos",
+        "Aplicar de baixo para cima, sem pisar telhas molhadas",
+        "Deixar atuar sem deixar secar",
+        "Enxaguar a baixa pressão ou deixar a chuva terminar conforme protocolo acordado",
+        "Voltar a molhar e neutralizar plantas",
+        "Fotos depois do mesmo ângulo das fotos antes"
+      ],
+      "contraindicacoes": [
+        "Telhado de fibrocimento antigo",
+        "Vento forte (deriva para vizinhos/carros)",
+        "Sol forte a meio do dia (seca a mistura)",
+        "Chuva prevista nas horas seguintes"
+      ],
+      "avisar_cliente": "Líquenes mortos podem levar semanas a desaparecer por completo.",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "SW-02",
+      "pilar": "softwash",
+      "sop_app": "fachada",
+      "parar": false,
+      "titulo": "Fachada em reboco pintado ou capoto com manchas biológicas",
+      "superficies": [
+        "reboco_pintado",
+        "capoto_etics"
+      ],
+      "contaminantes": [
+        "algas_verdes",
+        "manchas_pretas"
+      ],
+      "metodo": "Softwash a baixa pressão",
+      "mistura": "Reboco pintado: hipoclorito 1–3% + surfactante. Capoto/ETICS: começar abaixo de 0,5% e só subir com teste (a validar com o fabricante do sistema).",
+      "tempo_atuacao_min": "5–10",
+      "regra_ajuste": "Se ao fim de 5–7 min a mancha não desapareceu, a mistura está fraca; se desaparece em segundos, provavelmente está forte demais.",
+      "passos": [
+        "Confirmar se é capoto (som oco ao bater) — muda a concentração",
+        "Teste numa zona escondida (cor da tinta / acabamento)",
+        "Molhar plantas e proteger caixilharia",
+        "Aplicar de baixo para cima",
+        "Enxaguar de cima para baixo com abundância, incluindo janelas e alumínios",
+        "Neutralizar plantas"
+      ],
+      "contraindicacoes": [
+        "Tinta que descolora no teste",
+        "Fissuras com infiltração — reportar antes",
+        "Capoto com acabamento fissurado ou descolado"
+      ],
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "SW-03",
+      "pilar": "softwash",
+      "sop_app": "pavimento",
+      "parar": false,
+      "titulo": "Pavimentos de betão, pavê ou calçada",
+      "superficies": [
+        "pavimento_betao",
+        "calcada_portuguesa"
+      ],
+      "contaminantes": [
+        "algas_verdes",
+        "manchas_pretas",
+        "musgo",
+        "sujidade_atmosferica"
+      ],
+      "metodo": "Pré-tratamento + lavagem com surface cleaner + pós-tratamento",
+      "mistura": "Hipoclorito 1–3% como pré/pós-tratamento. Calçada: nunca ácidos.",
+      "passos": [
+        "Varrer e retirar musgo grosso",
+        "Pré-tratar",
+        "Lavar com surface cleaner (pressão moderada na calçada)",
+        "Pós-tratar para matar o que ficou e atrasar o regresso",
+        "Controlar escorrência para sarjetas"
+      ],
+      "nota_comercial": "Ressemear areia nas juntas do pavê pode ser vendido como extra.",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "SW-04",
+      "pilar": "softwash",
+      "sop_app": "pavimento",
+      "parar": false,
+      "titulo": "Madeira / deck",
+      "superficies": [
+        "madeira_deck"
+      ],
+      "contaminantes": [
+        "algas_verdes",
+        "manchas_pretas",
+        "sujidade_atmosferica"
+      ],
+      "metodo": "Química suave + escova",
+      "mistura": "Percarbonato de sódio (seguir fabricante)",
+      "contraindicacoes": [
+        "Hipoclorito concentrado",
+        "Alta pressão (levanta fibra)"
+      ],
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "SW-05",
+      "pilar": "softwash",
+      "sop_app": null,
+      "parar": true,
+      "titulo": "Eflorescências ou ferrugem detetadas",
+      "superficies": [
+        "pavimento_betao",
+        "reboco_pintado",
+        "pedra_natural"
+      ],
+      "contaminantes": [
+        "eflorescencias",
+        "ferrugem"
+      ],
+      "metodo": "NÃO aplicar protocolo de softwash",
+      "acao": "Registar, fotografar e informar o cliente. Eflorescências indicam humidade no material. Ferrugem exige produto específico (geralmente ácido) — nunca no mesmo momento que hipoclorito.",
+      "confianca": "fonte"
+    },
+    {
+      "id": "SW-06",
+      "pilar": "softwash",
+      "sop_app": null,
+      "parar": true,
+      "titulo": "Fibrocimento suspeito",
+      "superficies": [
+        "fibrocimento"
+      ],
+      "contaminantes": [],
+      "metodo": "PARAR",
+      "acao": "Não lavar, escovar, pisar ou partir. Informar o cliente da possibilidade de amianto e recomendar avaliação por entidade certificada.",
+      "confianca": "fonte"
+    },
+    {
+      "id": "SC-01",
+      "pilar": "solar_care",
+      "sop_app": "solar",
+      "parar": false,
+      "titulo": "Limpeza de painéis fotovoltaicos residenciais",
+      "superficies": [
+        "painel_fv_vidro"
+      ],
+      "contaminantes": [
+        "po_polen",
+        "dejetos_aves",
+        "sujidade_atmosferica",
+        "calcario_agua"
+      ],
+      "metodo": "Água desmineralizada + escova macia (poste com água pura)",
+      "regras_criticas": [
+        "Ler o manual do fabricante dos painéis — a garantia pode depender de cumprir o método indicado",
+        "Nunca máquina de alta pressão nem químicos agressivos",
+        "Nunca hipoclorito",
+        "Não pulverizar caixa de ligação nem a parte traseira",
+        "Evitar choque térmico: limpar de manhã cedo ou ao fim do dia, não com painéis muito quentes",
+        "Não pisar nem apoiar ferramentas nos painéis"
+      ],
+      "passos": [
+        "Fotografar estado antes (incluindo leitura do inversor/app de produção, se o cliente permitir)",
+        "Inspeção visual: vidro partido, delaminação, pontos castanhos, cabos soltos, ninhos de aves por baixo",
+        "Amolecer dejetos com água",
+        "Escovar com água desmineralizada",
+        "Enxaguar com água desmineralizada e deixar secar sem marcas",
+        "Fotos depois + nota de anomalias observadas"
+      ],
+      "limites": "Anomalias elétricas são para o instalador. A LITEC observa e reporta; não intervém na parte elétrica.",
+      "referencia": "Exemplo de fabricante (First Solar): água a baixa pressão até 35 bar, diferença de temperatura água/painel não superior a 20 °C, sem água na caixa de ligação. Cada fabricante tem regras próprias.",
+      "confianca": "fonte"
+    },
+    {
+      "id": "CD-01",
+      "pilar": "campos_desportivos",
+      "sop_app": null,
+      "parar": false,
+      "titulo": "Manutenção de campo de padel em relva sintética",
+      "superficies": [
+        "relva_sintetica_padel",
+        "vidro_temperado_padel"
+      ],
+      "contaminantes": [
+        "musgo",
+        "algas_verdes",
+        "po_polen"
+      ],
+      "metodo": "Escovagem mecânica + redistribuição de areia + tratamento localizado + vidros",
+      "frequencias_referencia": {
+        "diaria_clube": "Varrer e redistribuir areia",
+        "mensal_servico_LITEC": "Limpeza profunda: detritos, musgo/algas nas zonas húmidas, linhas, drenagem",
+        "periodica": "Vidros, verificação de silicones e parafusos, vedações"
+      },
+      "passos": [
+        "Retirar folhas e detritos",
+        "Escovar para levantar fibras e uniformizar areia",
+        "Tratar musgo/algas só nas zonas afetadas com produto para relva sintética",
+        "Verificar drenagem (poças após chuva = problema)",
+        "Limpar vidros e verificar silicones/parafusos — reportar folgas",
+        "Registar zonas com desgaste"
+      ],
+      "proposta_valor": "O clube vende horas de jogo. Campo com musgo escorrega, joga pior e perde vida útil. A LITEC faz o trabalho mensal que a equipa do clube adia.",
+      "confianca": "pratica_setor"
+    },
+    {
+      "id": "EJ-01",
+      "pilar": "espacos_jogo_infantil",
+      "sop_app": null,
+      "parar": false,
+      "titulo": "Limpeza e higienização de espaço de jogo infantil",
+      "superficies": [
+        "equipamento_eji",
+        "pavimento_borracha_eji"
+      ],
+      "contaminantes": [
+        "sujidade_atmosferica",
+        "algas_verdes",
+        "dejetos_aves"
+      ],
+      "metodo": "Detergente adequado + baixa pressão + enxaguamento total",
+      "regras_criticas": [
+        "Equipamento de contacto direto com crianças — enxaguamento total, nada de resíduos",
+        "Não danificar pavimento amortecedor",
+        "Limpeza NÃO é inspeção de segurança"
+      ],
+      "passos": [
+        "Vedar o espaço durante o serviço",
+        "Recolher lixo, vidros, objetos cortantes",
+        "Limpar equipamentos e pavimento",
+        "Enxaguar totalmente e deixar secar antes de reabrir",
+        "Registar defeitos visíveis (peças soltas, partidas, pavimento levantado) e comunicar ao responsável"
+      ],
+      "enquadramento": "A norma EN 1176-7 orienta a inspeção e manutenção em 3 níveis: visual de rotina, operacional e principal anual. A inspeção anual é feita por inspetor competente. A LITEC pode fazer limpeza e a observação de rotina, não certificar segurança. Legislação nacional sobre segurança de espaços de jogo — confirmar diploma em vigor antes de vender.",
+      "confianca": "a_validar"
+    },
+    {
+      "id": "HD-01",
+      "pilar": "higiene_desinfecao",
+      "sop_app": null,
+      "parar": false,
+      "titulo": "Desinfeção de superfícies exteriores e zonas comuns",
+      "superficies": [
+        "pavimento_betao",
+        "equipamento_eji",
+        "pvc_aluminio"
+      ],
+      "contaminantes": [
+        "dejetos_aves",
+        "sujidade_atmosferica"
+      ],
+      "metodo": "Limpar primeiro, desinfetar depois",
+      "regras_criticas": [
+        "Desinfetante sobre sujidade não funciona — limpar antes",
+        "Usar só biocida com autorização DGS e para o uso indicado no rótulo",
+        "Respeitar tempo de contacto do rótulo",
+        "Não prometer 'eliminação de vírus' sem o produto ter essa reivindicação aprovada"
+      ],
+      "confianca": "a_validar"
+    }
+  ],
+  "seguranca": {
+    "regras_absolutas": [
+      "Nunca misturar hipoclorito com ácidos ou amoníaco",
+      "Nunca misturar hipoclorito com algicidas de amónio quaternário",
+      "Nunca trabalhar em altura sem acesso seguro e equipamento anti-queda",
+      "Nunca intervir em fibrocimento suspeito",
+      "Nunca alta pressão em painéis solares, capoto ou telhas",
+      "Nunca ácidos em calcário, mármore ou calçada portuguesa",
+      "Nunca deixar escorrência química ir diretamente para sarjetas, rios ou terrenos sem controlo",
+      "EPI completo sempre que se manuseia químico concentrado"
+    ],
+    "condicoes_meteo_nao_trabalhar": [
+      "Vento forte",
+      "Chuva iminente (lava a mistura antes de atuar)",
+      "Sol forte em superfícies quentes",
+      "Geada"
+    ],
+    "primeiros_socorros_quimicos": "Olhos ou pele: lavar com água abundante durante vários minutos e seguir FDS. Inalação: ar livre. Ter sempre água limpa disponível na carrinha. Em caso grave: 112. Centro de Informação Antivenenos (CIAV): 800 250 250.",
+    "ambiente": "Escorrências de hipoclorito são tóxicas para vida aquática. Proteger sarjetas e planear onde vai a água. Regras municipais de descarga — confirmar com a Câmara de Almada."
+  },
+  "checklists": {
+    "pre_servico": [
+      "Tipo de superfície confirmado (e não é fibrocimento suspeito)",
+      "Teste numa zona escondida feito",
+      "Meteorologia verificada",
+      "Plantas molhadas/protegidas",
+      "Carros, mobiliário e objetos afastados ou cobertos",
+      "Janelas fechadas",
+      "Sarjetas protegidas",
+      "EPI vestido",
+      "Fotos antes (mesmos ângulos para o depois)"
+    ],
+    "pos_servico": [
+      "Enxaguamento completo (vidros, alumínios, plantas)",
+      "Plantas neutralizadas",
+      "Fotos depois",
+      "Anomalias registadas e comunicadas",
+      "Cliente informado sobre resultado esperado nos dias seguintes",
+      "Registo de trabalho preenchido"
+    ],
+    "registo_trabalho_campos": [
+      "data",
+      "cliente",
+      "localidade",
+      "pilar",
+      "superficie",
+      "contaminante",
+      "area_m2",
+      "protocolo_id",
+      "produto",
+      "concentracao_pct",
+      "tempo_atuacao_min",
+      "n_aplicacoes",
+      "meteorologia",
+      "duracao_total_min",
+      "litros_produto",
+      "resultado_1a5",
+      "problemas",
+      "fotos_antes",
+      "fotos_depois",
+      "notas"
+    ]
+  },
+  "formacao": [
+    {
+      "id": "F01",
+      "titulo": "Segurança química",
+      "objetivos": [
+        "Ler uma FDS",
+        "Escolher EPI",
+        "Saber o que nunca misturar",
+        "Reagir a um acidente"
+      ],
+      "conteudo": [
+        "O hipoclorito é corrosivo e reage perigosamente com ácidos e amoníaco",
+        "A FDS do produto concreto manda — secções de perigos, EPI, primeiros socorros e incompatibilidades",
+        "Armazenar à sombra e separado de ácidos"
+      ],
+      "verificacao": [
+        {
+          "pergunta": "Posso usar removedor de ferrugem logo a seguir a hipoclorito na mesma zona?",
+          "resposta": "Não. Ácido + hipoclorito liberta cloro gasoso. Enxaguar bem e separar no tempo."
+        },
+        {
+          "pergunta": "Onde confirmo o EPI necessário?",
+          "resposta": "Na Ficha de Dados de Segurança do produto."
+        }
+      ]
+    },
+    {
+      "id": "F02",
+      "titulo": "Diagnóstico: superfície + contaminante",
+      "objetivos": [
+        "Identificar superfície",
+        "Distinguir biológico de mineral",
+        "Escolher protocolo ou decidir não intervir"
+      ],
+      "conteudo": [
+        "Biológico (verde, preto, líquenes) responde a hipoclorito",
+        "Mineral (branco, laranja) NÃO responde a hipoclorito",
+        "Na dúvida: teste pequeno, foto, registo",
+        "Fibrocimento antigo = parar"
+      ],
+      "verificacao": [
+        {
+          "pergunta": "Manchas brancas num muro de tijolo — que protocolo?",
+          "resposta": "Nenhum de softwash. São eflorescências: registar e informar o cliente sobre humidade."
+        },
+        {
+          "pergunta": "Crostas laranja redondas num telhado?",
+          "resposta": "Líquenes — SW-01, avisar que as crostas podem levar semanas a soltar."
+        }
+      ]
+    },
+    {
+      "id": "F03",
+      "titulo": "Diluições e mistura",
+      "objetivos": [
+        "Calcular uma diluição",
+        "Ajustar pela observação"
+      ],
+      "conteudo": [
+        "Fórmula: litros de produto = litros totais × (% alvo ÷ % do produto)",
+        "Regra de ajuste: em fachadas, a mancha deve ceder em cerca de 5–7 minutos",
+        "Produto velho = mais fraco"
+      ],
+      "verificacao": [
+        {
+          "pergunta": "Quero 50 L a 2% com SH a 12,5%. Quanto SH?",
+          "resposta": "50 × (2 ÷ 12,5) = 8 L de SH + 42 L de água."
+        }
+      ]
+    },
+    {
+      "id": "F04",
+      "titulo": "Proteção de plantas e envolvente",
+      "objetivos": [
+        "Evitar queixas e indemnizações"
+      ],
+      "conteudo": [
+        "Plantas encharcadas absorvem menos química",
+        "Molhar antes, durante e depois",
+        "Neutralizar com tiossulfato",
+        "Carros e caixilharia: cobrir ou enxaguar logo"
+      ],
+      "verificacao": [
+        {
+          "pergunta": "Porque se molham as plantas antes?",
+          "resposta": "Saturadas, absorvem menos solução, e o solo húmido dilui escorrências."
+        }
+      ]
+    },
+    {
+      "id": "F05",
+      "titulo": "Painéis solares sem perder garantia",
+      "objetivos": [
+        "Limpar sem danificar",
+        "Reportar anomalias"
+      ],
+      "conteudo": [
+        "Manual do fabricante primeiro",
+        "Água desmineralizada, escova macia, nada de alta pressão nem químicos agressivos",
+        "Não molhar caixa de ligação, evitar choque térmico",
+        "Observar e reportar; parte elétrica é do instalador"
+      ],
+      "verificacao": [
+        {
+          "pergunta": "Posso limpar painéis ao meio-dia em agosto?",
+          "resposta": "Não é recomendável: painel muito quente + água fria = risco de choque térmico e marcas por secagem rápida."
+        }
+      ]
+    },
+    {
+      "id": "F06",
+      "titulo": "Trabalho em altura e acesso",
+      "objetivos": [
+        "Decidir se é seguro executar"
+      ],
+      "conteudo": [
+        "Sem acesso seguro, não se faz — ou faz-se a partir do solo/escada com equipamento adequado",
+        "Não pisar telhas molhadas",
+        "Avaliar se o serviço precisa de seguro e equipamento específico antes de orçamentar"
+      ],
+      "verificacao": [
+        {
+          "pergunta": "Cliente insiste em que subas a um telhado sem pontos de ancoragem. O que fazes?",
+          "resposta": "Não subo. Proponho aplicação a partir do solo/plataforma ou recuso o trabalho."
+        }
+      ],
+      "nota": "Requisitos legais de formação em trabalho em altura — confirmar com a ACT/entidade formadora."
+    },
+    {
+      "id": "F07",
+      "titulo": "Registo e fotografia",
+      "objetivos": [
+        "Construir prova e base de dados própria"
+      ],
+      "conteudo": [
+        "Fotos antes/depois do mesmo ângulo e luz",
+        "Registar sempre produto, %, tempo e resultado",
+        "Ao fim de 20–30 trabalhos, os teus registos valem mais do que qualquer guia genérico"
+      ]
+    }
+  ],
+  "venda": {
+    "explicacoes_simples": [
+      {
+        "tema": "O que fazemos",
+        "texto": "Manutenção técnica de telhados, fachadas e painéis solares. O musgo, os líquenes e os fungos retêm humidade e degradam telhas, rebocos e pinturas. Tratá-los a tempo custa muito menos do que reparar."
+      },
+      {
+        "tema": "O método (SoftWash)",
+        "texto": "Em vez de arrancar a sujidade à força com alta pressão, aplicamos a baixa pressão um produto adequado a cada material, que elimina a contaminação biológica na raiz. A superfície não é agredida e o resultado dura mais."
+      },
+      {
+        "tema": "Porque não alta pressão no telhado",
+        "texto": "A alta pressão tira o verde mas parte telhas, arranca o vidrado e empurra água para dentro da cobertura. A raiz fica e volta mais depressa."
+      },
+      {
+        "tema": "Painéis solares",
+        "texto": "Pó, pólen e dejetos de aves fazem perder produção sem que se dê por isso. Recuperamos a produção com água desmineralizada e escova macia, dentro das regras do fabricante. Compare a produção na app do inversor antes e depois."
+      },
+      {
+        "tema": "Prevenção",
+        "texto": "Intervir quando está muito mau custa mais e desgasta mais o material. Manutenção regular sai mais barata ao longo dos anos."
+      }
+    ],
+    "faq": [
+      {
+        "p": "Vai estragar as minhas plantas?",
+        "r": "Protegemos as plantas antes, durante e depois: molhamos, cobrimos as sensíveis e neutralizamos no fim."
+      },
+      {
+        "p": "Quanto tempo dura?",
+        "r": "Depende da orientação, sombra e humidade. Em zonas húmidas e viradas a norte volta mais cedo. Indicamos uma estimativa depois de ver o local."
+      },
+      {
+        "p": "Fica logo tudo limpo?",
+        "r": "Algas e manchas saem no dia. Líquenes morrem no dia, mas as crostas podem levar algumas semanas a cair com a chuva."
+      },
+      {
+        "p": "Os produtos são perigosos?",
+        "r": "São produtos profissionais usados em diluição controlada, com equipamento de proteção e controlo da escorrência. Não mexemos em nada que não conheçamos."
+      },
+      {
+        "p": "Posso fazer eu com uma máquina de pressão?",
+        "r": "Pode, mas é aí que a maioria dos danos acontece: telhas partidas, fachadas marcadas, quedas. E a raiz da sujidade fica."
+      },
+      {
+        "p": "Limpar os painéis tira a garantia?",
+        "r": "Uma limpeza mal feita pode. Seguimos o método indicado pelo fabricante dos seus painéis."
+      }
+    ],
+    "objecoes": [
+      {
+        "objecao": "É caro.",
+        "resposta": "Comparar com o custo de substituir telhas ou repintar uma fachada. Mostrar fotos antes/depois de trabalhos reais."
+      },
+      {
+        "objecao": "O meu vizinho faz isso mais barato com uma máquina.",
+        "resposta": "Explicar diferença de método e risco de dano. Não criticar o vizinho; mostrar o resultado a médio prazo."
+      },
+      {
+        "objecao": "Vou esperar.",
+        "resposta": "Aceitar. Deixar contacto e fotos do diagnóstico. A biologia continua a crescer — voltar a contactar na estação seguinte."
+      },
+      {
+        "objecao": "Não sei se os painéis estão sujos o suficiente.",
+        "resposta": "Comparar a produção atual com a do mesmo mês do ano anterior na app do inversor."
+      }
+    ],
+    "nota_estrategica": "Vende-se manutenção técnica, não limpeza: preservar o ativo, evitar reparações, recuperar produção. Não usar termos técnicos (hipoclorito, surfactante, %, pressão) com o cliente. 'Limpeza' só nas categorias e palavras-chave do Google."
+  },
+  "pendentes_validar": [
+    "Diploma legal em vigor sobre segurança de espaços de jogo e recreio em Portugal e o que exige do prestador de limpeza",
+    "Se o uso de hipoclorito como algicida exterior exige produto biocida autorizado (TP02) em vez de hipoclorito industrial",
+    "Regras de descarga de águas residuais da Câmara Municipal de Almada / SMAS",
+    "Requisitos de formação e seguro para trabalho em altura (ACT, seguradora)",
+    "Fornecedores em PT de SH, surfactante compatível, tiossulfato e sistemas de água pura",
+    "Manuais de limpeza dos fabricantes de painéis mais comuns na zona (pedir ao instalador)",
+    "Concentração máxima segura em capoto/ETICS — pedir ao fabricante do sistema",
+    "Eficácia e durabilidade do algicida preventivo — teste de meia-área com fotos a 1, 3 e 6 meses",
+    "Preçário R8 vs custo mínimo do Excel de preços — confirmar que nenhum preço da app fica abaixo do custo",
+    "Tempos reais por m2 e consumos — vêm do registo de trabalhos, não da internet"
+  ],
+  "fontes": [
+    {
+      "tema": "SH 3–6% em telhados, baixa pressão, tiossulfato",
+      "url": "https://www.lucidbots.com/blog/roof-cleaning-101"
+    },
+    {
+      "tema": "Surfactante ~1:50 com hipoclorito",
+      "url": "https://www.smartseal.co.uk/roof/cleaning-products/premium-surfactant.htm"
+    },
+    {
+      "tema": "Regra 5–7 min de tempo de atuação em fachadas",
+      "url": "https://powerwash.com/articles/best-house-wash-mix-soft-washing.html"
+    },
+    {
+      "tema": "SH diluído 1–6% conforme superfície; percarbonato como alternativa",
+      "url": "https://rm-suttner.com/?p=33120"
+    },
+    {
+      "tema": "Proteção de plantas: pré-molhar, diluição, enxaguar",
+      "url": "https://www.bestversionmedia.com/article/2026-07-will-pressure-washing-hurt-my-plants-understanding-soft-washing-landscaping-protection-and-why-technique-matters/"
+    },
+    {
+      "tema": "Guia de limpeza de módulos First Solar (pressão, temperatura, caixa de ligação)",
+      "url": "https://www.scribd.com/document/88831190/PD-5-804-Module-Cleaning"
+    },
+    {
+      "tema": "Painéis: sem alta pressão, água desmineralizada",
+      "url": "https://hawaiirenovation.staradvertiser.com/2019/11/exterior/energy/care-solar-panels/"
+    },
+    {
+      "tema": "Padel: varrer diariamente, limpeza profunda mensal, fungicida localizado",
+      "url": "https://www.tiendapadelpoint.com/en/maintenance-artificial-grass-padel-court-en"
+    },
+    {
+      "tema": "Padel: areia, vidros, silicones e parafusos",
+      "url": "https://www.amarantoidea.com/en/padel-court-maintenance/"
+    },
+    {
+      "tema": "EN 1176-7: inspeção de rotina, operacional e anual",
+      "url": "https://www.torpointtowncouncil.gov.uk/data/uploads/2327_927544064.pdf"
+    },
+    {
+      "tema": "DGS autoriza biocidas TP02 em Portugal",
+      "url": "https://poisoncentres.echa.europa.eu/documents/10162/739a9837-c82d-4f2a-fb40-f936c3d52e40"
+    },
+    {
+      "tema": "Comunidade de profissionais (leitura, não copiar)",
+      "url": "https://www.reddit.com/r/pressurewashing/"
+    }
+  ],
+  "matriz_quimica": {
+    "legenda": {
+      "SIM": "adequado",
+      "TESTAR": "testar numa zona escondida e usar com cuidado",
+      "NÃO": "não usar"
+    },
+    "nota": "Orientação inicial. Validar sempre com a ficha técnica do produto e o fabricante do revestimento. Nunca aplicar ácido sobre resíduos de hipoclorito nem o contrário: enxaguar entre fases.",
+    "colunas": [
+      "alcalino",
+      "acido_suave",
+      "hipoclorito"
+    ],
+    "linhas": [
+      {
+        "suporte": "Pedra calcária / mármore / lioz",
+        "superficies": [
+          "pedra_natural",
+          "calcada_portuguesa"
+        ],
+        "alcalino": "TESTAR",
+        "acido_suave": "NÃO",
+        "hipoclorito": "TESTAR"
+      },
+      {
+        "suporte": "Betão à vista",
+        "superficies": [
+          "pavimento_betao"
+        ],
+        "alcalino": "SIM",
+        "acido_suave": "TESTAR",
+        "hipoclorito": "SIM"
+      },
+      {
+        "suporte": "Reboco pintado",
+        "superficies": [
+          "reboco_pintado"
+        ],
+        "alcalino": "SIM",
+        "acido_suave": "TESTAR",
+        "hipoclorito": "TESTAR"
+      },
+      {
+        "suporte": "Azulejo / cerâmica",
+        "superficies": [
+          "azulejo_fachada",
+          "telha_ceramica"
+        ],
+        "alcalino": "SIM",
+        "acido_suave": "TESTAR (juntas)",
+        "hipoclorito": "SIM"
+      },
+      {
+        "suporte": "Painel sandwich / chapa lacada",
+        "superficies": [],
+        "alcalino": "TESTAR",
+        "acido_suave": "TESTAR",
+        "hipoclorito": "TESTAR"
+      },
+      {
+        "suporte": "Vidro",
+        "superficies": [
+          "painel_fv_vidro"
+        ],
+        "alcalino": "SIM",
+        "acido_suave": "TESTAR",
+        "hipoclorito": "TESTAR"
+      },
+      {
+        "suporte": "Alumínio anodizado",
+        "superficies": [
+          "pvc_aluminio"
+        ],
+        "alcalino": "TESTAR",
+        "acido_suave": "NÃO",
+        "hipoclorito": "TESTAR"
+      }
+    ],
+    "confianca": "pratica_setor"
+  },
+  "precario": {
+    "fonte": "Referência R8 do plano (zonas + majoradores). Era o PRICEBOOK do index.html; agora a app lê daqui.",
+    "unidades": {
+      "telhado": "m²",
+      "fachada": "m²",
+      "solar": "painéis",
+      "pavimento": "m²"
+    },
+    "zonas": {
+      "ultra": {
+        "nome": "Ultra-Premium",
+        "exemplos": "Aroeira, Belverde, Verdizela, Tróia",
+        "telhado": [
+          10,
+          14
+        ],
+        "fachada": [
+          9,
+          12
+        ],
+        "solar": [
+          7,
+          12
+        ],
+        "pavimento": [
+          5,
+          8
+        ]
+      },
+      "premium": {
+        "nome": "Premium",
+        "exemplos": "Costa da Caparica, Sobreda, Almada Centro",
+        "telhado": [
+          8,
+          12
+        ],
+        "fachada": [
+          7,
+          10
+        ],
+        "solar": [
+          6,
+          9
+        ],
+        "pavimento": [
+          4,
+          6
+        ]
+      },
+      "urbana": {
+        "nome": "Urbana",
+        "exemplos": "Laranjeiro, Feijó, Corroios, Seixal",
+        "telhado": [
+          7,
+          10
+        ],
+        "fachada": [
+          6,
+          9
+        ],
+        "solar": [
+          4,
+          8
+        ],
+        "pavimento": [
+          3,
+          5
+        ]
+      }
+    },
+    "minimos_por_servico": {
+      "telhado": 350,
+      "fachada": 300,
+      "solar": 120,
+      "pavimento": 150
+    },
+    "majoradores": {
+      "altura_6m": 1.15,
+      "altura_9m_mewp_fixo": 250,
+      "inclinacao_35": 1.2,
+      "contaminacao_severa": 1.15,
+      "contaminacao_muito_severa": 1.25
+    },
+    "desconto_max_pct": 15,
+    "nota": "Preços de venda por m² ainda por validar nos pilotos (ticket médio de planeamento: 450 €). O Excel Modelo_Preco_Limpeza_Tecnica_Exterior calcula o custo mínimo; o preço da app nunca deve ficar abaixo dele."
+  }
+}

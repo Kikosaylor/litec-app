@@ -1229,6 +1229,6 @@
       "contaminacao_muito_severa": 1.25
     },
     "desconto_max_pct": 15,
-    "nota": "Preços de venda por m² ainda por validar nos pilotos (ticket médio de planeamento: 450 €). O Excel Modelo_Preco_Limpeza_Tecnica_Exterior calcula o custo mínimo; o preço da app nunca deve ficar abaixo dele."
+    "nota": "Preços de venda por m² ainda por validar nos pilotos (ticket médio de planeamento: 540 €). O Excel Modelo_Preco_Limpeza_Tecnica_Exterior calcula o custo mínimo; o preço da app nunca deve ficar abaixo dele."
   }
 }

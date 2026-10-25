@@ -1,8 +1,8 @@
 {
   "meta": {
     "nome": "LITEC — Base de Conhecimento DiagnostiScan",
-    "versao": "0.3",
-    "data": "2026-10-19",
+    "versao": "0.4",
+    "data": "2026-10-25",
     "idioma": "pt-PT",
     "usos": [
       "diagnostico_campo",
@@ -38,13 +38,17 @@
       "Critérios de compra do hipoclorito: cloro líquido de piscina não estabilizado ≥12,5% (conversas Hipoclorito/Garrafão, 17–19/10)",
       "Matriz químico × suporte do Guião de Visita B2B passa a viver aqui (fonte única)",
       "Preçário da app (Referência R8) passa a viver aqui (fonte única para app e Excel)"
+    ],
+    "alteracoes_0_4": [
+      "Âmbito Fase 0: telhados inclinados e trabalho em altura fora de âmbito; SW-01 passa a parar=true (a app bloqueia o orçamento)",
+      "Pilar SoftWash e texto de venda sem telhados"
     ]
   },
   "pilares": [
     {
       "id": "softwash",
       "nome": "SoftWash",
-      "ambito": "Telhados, fachadas, muros, pavimentos — remoção de sujidade biológica e atmosférica a baixa pressão com química controlada"
+      "ambito": "Fachadas, muros, decks, pedra e pavimentos — a partir do solo, a baixa pressão e com química controlada. Telhados inclinados e trabalho em altura: fora de âmbito na Fase 0 (recusar ou subcontratar)."
     },
     {
       "id": "solar_care",
@@ -456,7 +460,7 @@
       "id": "SW-01",
       "pilar": "softwash",
       "sop_app": "telhado",
-      "parar": false,
+      "parar": true,
       "titulo": "Telhado cerâmico/betão com algas, manchas pretas ou líquenes",
       "superficies": [
         "telha_ceramica",
@@ -468,7 +472,7 @@
         "liquenes",
         "musgo"
       ],
-      "metodo": "Softwash a baixa pressão",
+      "metodo": "PARAR — fora de âmbito na Fase 0",
       "mistura": "Hipoclorito 3–6% + surfactante",
       "tempo_atuacao_min": "10–20 (líquenes pesados podem precisar de 2.ª aplicação)",
       "passos": [
@@ -489,7 +493,9 @@
         "Chuva prevista nas horas seguintes"
       ],
       "avisar_cliente": "Líquenes mortos podem levar semanas a desaparecer por completo.",
-      "confianca": "pratica_setor"
+      "confianca": "pratica_setor",
+      "fora_de_ambito_fase0": true,
+      "acao": "Telhados inclinados implicam trabalho em altura: não executar. Recusar ou subcontratar a operador qualificado e segurado. Registar e fotografar a partir do solo, se útil para o cliente."
     },
     {
       "id": "SW-02",
@@ -939,7 +945,7 @@
     "explicacoes_simples": [
       {
         "tema": "O que fazemos",
-        "texto": "Manutenção técnica de telhados, fachadas e painéis solares. O musgo, os líquenes e os fungos retêm humidade e degradam telhas, rebocos e pinturas. Tratá-los a tempo custa muito menos do que reparar."
+        "texto": "Manutenção técnica de fachadas, pedra, madeira e painéis solares. O musgo, os líquenes e os fungos retêm humidade e degradam rebocos, pedra, madeira e pinturas. Tratá-los a tempo custa muito menos do que reparar."
       },
       {
         "tema": "O método (SoftWash)",

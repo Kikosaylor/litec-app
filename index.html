@@ -205,6 +205,12 @@
   .qa { font-size: 13px; margin: 8px 0; }
   .qa .r { color: var(--texto-suave); margin-top: 4px; }
 
+  .faixa-teste {
+    background: #8B1A12; color: var(--branco); text-align: center;
+    font-size: 12px; font-weight: 700; padding: 8px 12px;
+  }
+  .faixa-teste a { color: var(--branco); }
+
   .aviso-config {
     background: #FFF4E5;
     border: 1px solid #FFD08A;
@@ -225,6 +231,11 @@
   </div>
 </header>
 
+<div id="faixa-teste" class="faixa-teste" style="display:none;">
+  🧪 MODO TESTE — fotos, diagnóstico e proposta SIMULADOS, sem IA e sem custos. Nada disto é real.
+  <a href="./">Sair do teste</a>
+</div>
+
 <nav class="tabs">
   <button id="tab-btn-diagnostico" class="ativo" onclick="mudarTab('diagnostico')">📷 Diagnóstico</button>
   <button id="tab-btn-orcamento" onclick="mudarTab('orcamento')">💶 Orçamento</button>
@@ -237,12 +248,17 @@
 <section id="painel-diagnostico" class="painel ativo">
 
   <div id="aviso-endpoint" class="aviso-config" style="display:none;">
-    ⚠️ Configura o endpoint do Worker na constante <code>API_ENDPOINT</code> no início do
+    ⚠️ Configurar o endpoint do Worker na constante <code>API_ENDPOINT</code> no início do
     ficheiro antes de usar o Diagnóstico (ver instruções no <code>cloudflare-worker-diagnostiscan.js</code>).
   </div>
 
   <div class="card">
     <h2>1. Fotos</h2>
+    <div id="bloco-teste" style="display:none; margin-bottom:12px;">
+      <label for="cenario-teste" style="margin-top:0;">🧪 Cenário de teste</label>
+      <select id="cenario-teste"></select>
+      <button type="button" class="secundario" style="width:100%; margin-top:8px;" onclick="carregarFotosExemplo()">🧪 Carregar fotos de exemplo</button>
+    </div>
     <div style="display:flex; gap:8px;">
       <button type="button" class="secundario" style="flex:1;" onclick="document.getElementById('input-camera').click()">📷 Tirar Foto</button>
       <button type="button" class="secundario" style="flex:1;" onclick="document.getElementById('input-galeria').click()">🖼️ Carregar Fotos</button>
@@ -253,7 +269,7 @@
     <button type="button" class="secundario" id="btn-limpar-fotos" style="display:none; margin-top:8px;" onclick="limparFotos()">Limpar fotos</button>
 
     <label for="notas-campo">Notas de campo (opcional)</label>
-    <textarea id="notas-campo" placeholder="Ex: cliente refere infiltração há 2 anos, telhado com 15 anos..."></textarea>
+    <textarea id="notas-campo" placeholder="Ex: cliente refere manchas há 2 anos, fachada pintada há 10 anos..."></textarea>
 
     <button class="acao" id="btn-analisar" onclick="analisarFotos()">Analisar</button>
     <div id="diag-loading" class="loading" style="display:none;">
@@ -264,7 +280,7 @@
 
   <div class="card" id="card-resultado-diag" style="display:none;">
     <h2>Diagnóstico</h2>
-    <label for="sop-tipo">Tipo de serviço identificado (confirma ou corrige)</label>
+    <label for="sop-tipo">Tipo de serviço identificado (confirmar ou corrigir)</label>
     <select id="sop-tipo">
       <option value="telhado">SOP-01 — Roof Care</option>
       <option value="fachada">SOP-02 — Facade Treatment</option>
@@ -273,9 +289,9 @@
     </select>
     <div class="resultado" id="resultado-diagnostico"></div>
 
-    <label for="diag-superficie">Superfície (confirma ou corrige)</label>
+    <label for="diag-superficie">Superfície (confirmar ou corrigir)</label>
     <select id="diag-superficie" onchange="recalcularProtocolo()"></select>
-    <label for="diag-contaminante">Sujidade principal (confirma ou corrige)</label>
+    <label for="diag-contaminante">Sujidade principal (confirmar ou corrigir)</label>
     <select id="diag-contaminante" onchange="recalcularProtocolo()"></select>
 
     <div id="diag-parar" class="alerta-parar" style="display:none;"></div>
@@ -300,7 +316,6 @@
 
     <label for="orc-servico">Serviço</label>
     <select id="orc-servico" onchange="atualizarUnidade()">
-      <option value="telhado">Roof Care</option>
       <option value="fachada">Facade Treatment</option>
       <option value="solar">Solar Care</option>
       <option value="pavimento">Bio Treatment</option>
@@ -335,7 +350,7 @@
   <div class="card">
     <h2>3. Diagnóstico para a proposta</h2>
     <label for="orc-material">Material / superfície</label>
-    <input type="text" id="orc-material" placeholder="Preenchido automaticamente após o Diagnóstico, ou escreve à mão">
+    <input type="text" id="orc-material" placeholder="Preenchido automaticamente após o Diagnóstico, ou à mão">
 
     <label for="orc-causa">Estado e causa</label>
     <textarea id="orc-causa" placeholder="Ex: manchas escuras verticais por baixo da caleira, causadas por musgo/líquenes"></textarea>
@@ -459,6 +474,7 @@
 // (ver instruções em cloudflare-worker-diagnostiscan.js)
 // ==========================================================================
 const API_ENDPOINT = "https://litec-diagnostiscan.fap-antunes.workers.dev";
+const MAX_FOTOS = 6; // igual a MAX_IMAGENS no worker
 
 // ==========================================================================
 // PRICEBOOK — Referência R8. Vive em base_conhecimento.json (secção "precario"),
@@ -473,6 +489,130 @@ const NOMES_SERVICO = {
   solar: "Solar Care", pavimento: "Bio Treatment",
 };
 const UNIDADE = { telhado: "m²", fachada: "m²", solar: "painéis", pavimento: "m²" };
+
+// ==========================================================================
+// MODO TESTE (?teste=1) — simula a IA com cenários fixos. Sem chamadas ao
+// servidor, sem custos; histórico separado para não misturar com dados reais.
+// ==========================================================================
+const MODO_TESTE = new URLSearchParams(location.search).has('teste');
+const HIST_KEY = MODO_TESTE ? 'litec_historico_teste' : 'litec_historico';
+
+// Imagem de exemplo desenhada em SVG (não é fotografia real).
+function svgExemplo(fundo, desenho, legenda) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">` +
+    `<rect width="400" height="300" fill="${fundo}"/>${desenho}` +
+    `<rect x="0" y="262" width="400" height="38" fill="#000" opacity=".55"/>` +
+    `<text x="200" y="287" font-family="Arial" font-size="16" fill="#fff" text-anchor="middle">EXEMPLO · ${legenda}</text></svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+const manchas = (cor, n, y0, y1, r) => Array.from({ length: n }, (_, i) =>
+  `<ellipse cx="${(i * 97) % 400}" cy="${y0 + (i * 53) % (y1 - y0)}" rx="${r + (i % 3) * 6}" ry="${r * 0.7}" fill="${cor}" opacity=".55"/>`).join('');
+
+const CENARIOS_TESTE = [
+  {
+    nome: 'Fachada ETICS com algas → orçamento de fachada',
+    fotos: [
+      svgExemplo('#E8E2D6', '<rect x="60" y="40" width="70" height="90" fill="#9DB4C8"/><rect x="270" y="40" width="70" height="90" fill="#9DB4C8"/>' +
+        manchas('#4F7A3A', 14, 150, 255, 18) + '<rect x="58" y="130" width="74" height="6" fill="#bbb"/>', 'Fachada ETICS — algas'),
+      svgExemplo('#E5DFD2', manchas('#3E6B30', 20, 20, 255, 14), 'Pormenor junto ao solo'),
+    ],
+    diagnostico: {
+      superficie_id: 'capoto_etics', contaminante_ids: ['algas_verdes', 'manchas_pretas'], protocolo_id: 'SW-02', sop_chave: 'fachada',
+      sop_aplicavel: 'SOP-02 — Facade Treatment', material: 'Fachada em capoto (ETICS) pintada',
+      causa: 'Manchas verdes e escuras na base e por baixo dos peitoris — algas por humidade e falta de sol na fachada norte.',
+      produto_diluicao: 'Hipoclorito abaixo de 0,5% + surfactante (a validar em teste de 1 m²)',
+      pressao: 'Baixa pressão — só enxaguamento suave', riscos: 'Confirmar no local que é ETICS; teste de 1 m² obrigatório; proteger plantas e sarjetas.',
+      confianca: 'media',
+    },
+    area: 85,
+  },
+  {
+    nome: 'Deck de madeira com manchas pretas → orçamento de pavimento',
+    fotos: [svgExemplo('#9C6B3E', Array.from({ length: 9 }, (_, i) => `<rect x="0" y="${i * 30}" width="400" height="2" fill="#6B4423"/>`).join('') +
+      manchas('#2B2B2B', 16, 10, 255, 16), 'Deck de madeira — manchas pretas')],
+    diagnostico: {
+      superficie_id: 'madeira_deck', contaminante_ids: ['manchas_pretas', 'sujidade_atmosferica'], protocolo_id: 'SW-04', sop_chave: 'pavimento',
+      sop_aplicavel: 'SOP-04 — Bio Treatment', material: 'Deck de madeira exótica',
+      causa: 'Manchas pretas de bolor e sujidade acumulada nas zonas de sombra.',
+      produto_diluicao: 'Mistura do protocolo SW-04 (ver separador Campo)', pressao: 'Escova macia, sem lavadora',
+      riscos: 'Madeira escurece se a mistura ficar tempo demais; neutralizar e enxaguar.', confianca: 'alta',
+    },
+    area: 40,
+  },
+  {
+    nome: 'Painéis solares com pó e dejetos → orçamento Solar Care',
+    fotos: [svgExemplo('#7FA7C9', Array.from({ length: 12 }, (_, i) =>
+      `<rect x="${20 + (i % 4) * 92}" y="${20 + Math.floor(i / 4) * 78}" width="86" height="72" fill="#1F3A5F" stroke="#C0C8D0" stroke-width="3"/>`).join('') +
+      manchas('#D9D2C0', 18, 20, 240, 10), 'Painéis FV — pó e dejetos')],
+    diagnostico: {
+      superficie_id: 'painel_fv_vidro', contaminante_ids: ['po_polen', 'dejetos_aves'], protocolo_id: 'SC-01', sop_chave: 'solar',
+      sop_aplicavel: 'SOP-03 — Solar Care', material: 'Painéis fotovoltaicos em cobertura plana',
+      causa: 'Camada de pó e dejetos de aves a tapar parte das células.',
+      produto_diluicao: 'Água desmineralizada, sem químicos', pressao: 'Escova macia com água DI',
+      riscos: 'Só acesso por cobertura plana com guarda-corpo; nunca em altura.', confianca: 'alta',
+    },
+    area: 12,
+  },
+  {
+    nome: 'Telhado de telha com musgo → BLOQUEADO (fora de âmbito)',
+    fotos: [svgExemplo('#B5543A', Array.from({ length: 7 }, (_, i) => `<path d="M0 ${i * 38 + 20} Q50 ${i * 38 + 5} 100 ${i * 38 + 20} T200 ${i * 38 + 20} T300 ${i * 38 + 20} T400 ${i * 38 + 20}" stroke="#7A3523" stroke-width="4" fill="none"/>`).join('') +
+      manchas('#5E7F2E', 16, 10, 250, 15), 'Telhado em telha — musgo')],
+    diagnostico: {
+      superficie_id: 'telha_ceramica', contaminante_ids: ['musgo', 'liquenes'], protocolo_id: 'SW-01', sop_chave: 'telhado',
+      sop_aplicavel: 'SOP-01 — Roof Care', material: 'Telhado em telha cerâmica', causa: 'Musgo e líquenes nas telhas.',
+      riscos: 'Trabalho em altura e telhado inclinado.', confianca: 'alta',
+    },
+    area: 120,
+  },
+  {
+    nome: 'Parede com eflorescências → BLOQUEADO (não intervir)',
+    fotos: [svgExemplo('#D8D2C4', manchas('#FFFFFF', 22, 120, 255, 14) + '<rect x="0" y="250" width="400" height="12" fill="#999"/>', 'Parede — sais brancos')],
+    diagnostico: {
+      superficie_id: 'reboco_pintado', contaminante_ids: ['eflorescencias'], protocolo_id: 'SW-05', sop_chave: 'fachada',
+      sop_aplicavel: 'SOP-02 — Facade Treatment', material: 'Reboco pintado',
+      causa: 'Manchas brancas de sais (eflorescências) — sinal de humidade dentro da parede.',
+      riscos: 'Lavar não resolve: a origem é humidade.', confianca: 'media',
+    },
+    area: 30,
+  },
+];
+
+function prepararModoTeste() {
+  if (!MODO_TESTE) return;
+  document.getElementById('faixa-teste').style.display = 'block';
+  document.getElementById('bloco-teste').style.display = 'block';
+  document.getElementById('cenario-teste').innerHTML =
+    CENARIOS_TESTE.map((c, i) => `<option value="${i}">${escapeHtml(c.nome)}</option>`).join('');
+}
+
+function cenarioTeste() {
+  return CENARIOS_TESTE[parseInt(document.getElementById('cenario-teste').value, 10) || 0];
+}
+
+function carregarFotosExemplo() {
+  const c = cenarioTeste();
+  fotosBase64 = c.fotos.map(src => ({ data: '', media_type: 'image/svg+xml', preview: src }));
+  renderFotosPreview();
+  document.getElementById('notas-campo').value = '[TESTE] ' + c.nome;
+  document.getElementById('orc-quantidade').value = c.area;
+}
+
+function propostaSimulada(d) {
+  const cliente = document.getElementById('orc-cliente').value.trim();
+  const causa = document.getElementById('orc-causa').value || 'o estado observado na visita';
+  return {
+    mensagem_cliente:
+      `[TESTE — mensagem simulada, não enviar]\n\n` +
+      `Bom dia${cliente ? ' ' + cliente : ''},\n\n` +
+      `Antes de orçamentar, foi feito um diagnóstico técnico à superfície.\n\n` +
+      `O que foi identificado: ${causa}\n\n` +
+      `Se não for tratado, o problema tende a alastrar e a degradar o acabamento, obrigando mais tarde a reparação ou repintura.\n\n` +
+      `Solução: ${NOMES_SERVICO[d.servico]} — tratamento a baixa pressão, ajustado ao material, sem danificar o que uma lavagem agressiva danificaria.\n\n` +
+      `Orçamento: ${d.quantidade} ${UNIDADE[d.servico]} · ${ZONAS[d.zonaKey].nome} · €${d.total.toFixed(0)}\n\n` +
+      `Há disponibilidade para agendar na próxima semana. Qual o melhor dia?`,
+    notas_internas: '[TESTE] ' + (document.getElementById('orc-riscos').value || 'Nenhuma'),
+  };
+}
 
 // ==========================================================================
 // NAVEGAÇÃO ENTRE TABS
@@ -550,7 +690,11 @@ async function analisarFotos() {
     return;
   }
   if (fotosBase64.length === 0) {
-    erroEl.textContent = 'Tira ou seleciona pelo menos uma foto primeiro.';
+    erroEl.textContent = 'Tirar ou selecionar pelo menos uma foto primeiro.';
+    return;
+  }
+  if (fotosBase64.length > MAX_FOTOS) {
+    erroEl.textContent = `Máximo de ${MAX_FOTOS} fotos por análise — remover ${fotosBase64.length - MAX_FOTOS}.`;
     return;
   }
 
@@ -559,6 +703,15 @@ async function analisarFotos() {
   btn.disabled = true;
   loading.style.display = 'flex';
   document.getElementById('card-resultado-diag').style.display = 'none';
+
+  if (MODO_TESTE) {
+    await new Promise(r => setTimeout(r, 600));
+    renderDiagnostico(JSON.parse(JSON.stringify(cenarioTeste().diagnostico)));
+    document.getElementById('card-resultado-diag').style.display = 'block';
+    btn.disabled = false;
+    loading.style.display = 'none';
+    return;
+  }
 
   try {
     const resp = await fetch(API_ENDPOINT, {
@@ -629,7 +782,7 @@ function renderDiagnostico(diagnosis) {
   html += linha('Riscos / avisos', d.riscos);
   if (d.confianca) html += linha('Confiança da IA', d.confianca);
 
-  el.innerHTML = html || '<em>Sem resposta estruturada — tenta novamente.</em>';
+  el.innerHTML = html || '<em>Sem resposta estruturada — tentar novamente.</em>';
 
   // Liga à base: a IA sugere superfície/sujidade; o protocolo é decidido aqui, pela base.
   if (KB) {
@@ -784,7 +937,15 @@ function usarNoOrcamento() {
   if (protocoloAtual && protocoloAtual.sop_app) {
     document.getElementById('sop-tipo').value = protocoloAtual.sop_app;
   }
-  document.getElementById('orc-servico').value = document.getElementById('sop-tipo').value;
+  const servico = document.getElementById('sop-tipo').value;
+  const orcServico = document.getElementById('orc-servico');
+  // Serviços fora da Fase 0 (ex.: Roof Care) não existem no seletor do orçamento.
+  if (![...orcServico.options].some(o => o.value === servico)) {
+    document.getElementById('diag-erro').textContent =
+      `${NOMES_SERVICO[servico] || servico} está fora de âmbito — sem orçamento.`;
+    return;
+  }
+  orcServico.value = servico;
   atualizarUnidade();
   if (ultimoDiagnostico) {
     document.getElementById('orc-material').value = ultimoDiagnostico.material || '';
@@ -820,6 +981,12 @@ function calcularOrcamento(finalizar) {
 
   if (!finalizar) return null;
 
+  if (quantidade <= 0) {
+    document.getElementById('orc-erro').textContent =
+      servico === 'solar' ? 'Indicar o número de painéis.' : 'Indicar a área (m²).';
+    return null;
+  }
+
   let subtotal = precoUnidade * quantidade;
 
   // Majoradores multiplicativos
@@ -836,7 +1003,10 @@ function calcularOrcamento(finalizar) {
   // Desconto (máximo definido no preçário)
   let desconto = parseFloat(document.getElementById('orc-desconto').value) || 0;
   const avisoDesconto = document.getElementById('aviso-desconto');
-  if (desconto > DESCONTO_MAX) {
+  if (desconto < 0) {
+    desconto = 0;
+    avisoDesconto.textContent = 'O desconto não pode ser negativo — ajustado para 0%.';
+  } else if (desconto > DESCONTO_MAX) {
     desconto = DESCONTO_MAX;
     avisoDesconto.textContent = `Desconto máximo acumulado permitido é ${DESCONTO_MAX}% — ajustado automaticamente.`;
   } else {
@@ -856,20 +1026,28 @@ function calcularOrcamento(finalizar) {
 }
 
 async function gerarProposta() {
-  const dados = calcularOrcamento(true);
-  if (!dados) {
-    document.getElementById('orc-erro').textContent = 'Preçário não carregado — recarrega a página.';
-    return;
-  }
-
   const erroEl = document.getElementById('orc-erro');
   erroEl.textContent = '';
+  if (!ZONAS) {
+    erroEl.textContent = 'Preçário não carregado — recarregar a página.';
+    return;
+  }
+  const dados = calcularOrcamento(true);
+  if (!dados) return; // calcularOrcamento já mostrou o motivo
   const btn = document.getElementById('btn-gerar-proposta');
   const loading = document.getElementById('orc-loading');
   btn.disabled = true;
   loading.style.display = 'flex';
   document.getElementById('orc-texto-whatsapp').value = '';
   document.getElementById('orc-notas-internas-box').style.display = 'none';
+
+  if (MODO_TESTE) {
+    await new Promise(r => setTimeout(r, 600));
+    renderProposta(propostaSimulada(dados));
+    btn.disabled = false;
+    loading.style.display = 'none';
+    return;
+  }
 
   try {
     const resp = await fetch(API_ENDPOINT, {
@@ -919,15 +1097,27 @@ function renderProposta(proposta) {
 // ==========================================================================
 // HISTÓRICO (localStorage)
 // ==========================================================================
+// Um histórico corrompido não pode impedir a app de arrancar: nesse caso começa vazio.
+function lerHistorico() {
+  try {
+    const h = JSON.parse(localStorage.getItem(HIST_KEY) || '[]');
+    return Array.isArray(h) ? h : [];
+  } catch (e) {
+    return [];
+  }
+}
+
 function guardarHistorico(item) {
-  const historico = JSON.parse(localStorage.getItem('litec_historico') || '[]');
+  const historico = lerHistorico();
   historico.unshift(item);
-  localStorage.setItem('litec_historico', JSON.stringify(historico.slice(0, 30)));
+  try {
+    localStorage.setItem(HIST_KEY, JSON.stringify(historico.slice(0, 30)));
+  } catch (e) { /* armazenamento indisponível: o orçamento continua válido */ }
   renderHistorico();
 }
 
 function renderHistorico() {
-  const historico = JSON.parse(localStorage.getItem('litec_historico') || '[]');
+  const historico = lerHistorico();
   const container = document.getElementById('orc-historico');
   if (historico.length === 0) {
     container.innerHTML = '<div style="font-size:13px; color:var(--texto-suave);">Sem orçamentos gerados ainda.</div>';
@@ -936,8 +1126,8 @@ function renderHistorico() {
   container.innerHTML = historico.map(h => {
     const data = new Date(h.data).toLocaleDateString('pt-PT');
     return `<div class="historico-item">
-      <div class="linha1">${NOMES_SERVICO[h.servico]} — €${h.total.toFixed(0)}</div>
-      <div class="linha2">${h.cliente || 'Sem nome'} · ${h.zona} · ${data}</div>
+      <div class="linha1">${escapeHtml(NOMES_SERVICO[h.servico] || h.servico)} — €${Number(h.total || 0).toFixed(0)}</div>
+      <div class="linha2">${escapeHtml(h.cliente || 'Sem nome')} · ${escapeHtml(h.zona)} · ${data}</div>
     </div>`;
   }).join('');
 }
@@ -1055,6 +1245,7 @@ function renderCampo() {
 }
 
 // Inicialização
+prepararModoTeste();
 carregarBase();
 if (!API_ENDPOINT) {
   document.getElementById('aviso-endpoint').style.display = 'block';
